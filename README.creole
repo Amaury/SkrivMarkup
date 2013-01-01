@@ -1,0 +1,20 @@
+=Skriv Markup=
+
+Interpreter of the Skriv Markup Language. PHP implementation.
+
+==How to use it==
+You need to install the [[http://github.com/Amaury/wikirenderer|PSR version]] of [[http://github.com/laurentj/wikirenderer|WikiRenderer]].
+
+These libraries are PSR-0-compatible, so you'll also need an autoloader. You can use the [[https://github.com/Amaury/FineBase/blob/master/lib/FineAutoload.php|FineAutoload]] object from [[https://github.com/Amaury/FineBase|FineBase]].
+
+ <?php
+ require_once('finebase/FineAutoload.php');
+ FineAutoload::autoload();
+ $cfg = new \Skriv\Markup\Config();
+ $wikiRenderer = new \WikiRenderer\Renderer($cfg);
+ $html = $wikiRenderer->render($wikiString);
+ ?>
+
+==Skriv syntax==
+Stay tuned for the future [[http://markup.skriv.org]] website. Meanwhile, you can find an excerpt in [[http://www.geek-directeur-technique.com/2012/12/31/skriv-markup-language/|this blog post]] (in french).
+
