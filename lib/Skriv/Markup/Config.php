@@ -2,10 +2,19 @@
 
 namespace Skriv\Markup;
 
+/**
+ * SkrivMarkup configuration object.
+ * This object is based on the WikiRenderer project created by Laurent Jouanneau.
+ *
+ * @author	Amaury Bouchard <amaury@amaury.net>
+ * @copyright	© 2012-2013, Amaury Bouchard
+ * @package	SkrivMarkup
+ * @see		WikiRenderer
+ */
 class Config extends \WikiRenderer\Config  {
 	/** ??? */
 	public $defaultTextLineContainer = '\WikiRenderer\HtmlTextLine';
-	/** ??? */
+	/** List of inline markups. */
 	public $textLineContainers = array(
 		'\WikiRenderer\HtmlTextLine' => array(
 			'\Skriv\Markup\Strong',		// **strong**
@@ -21,7 +30,7 @@ class Config extends \WikiRenderer\Config  {
 			'\Skriv\Markup\Footnote'	// ((footnote))		((label|footnote))
 		)
 	);
-	/** liste des balises de type bloc reconnus par WikiRenderer. */
+	/** List of bloc markups. */
 	public $blocktags = array(
 		'\Skriv\Markup\Title',
 		'\Skriv\Markup\WikiList',
@@ -34,43 +43,81 @@ class Config extends \WikiRenderer\Config  {
 		'\Skriv\Markup\Paragraph',
 	);
 
-	/* ************ ATTRIBUTS SPECIFIQUES À SKRIV ************* */
-	// la syntaxe Skriv contient la possibilité de mettre des notes de bas de page
-	// celles-ci seront stockées ici, avant leur incorporation à la fin du texte.
+	/* ************ SKRIV MARKUP SPECIFIC ATTRIBUTES ************* */
+	/** List of the footnotes being created. */
 	private $_footnotes = null;
-	private $_footnotesId = 15;
-	/** Si c'est un appel récursif, cet attribut pointe sur l'objet "parent". */
+	/** Parent configuration object, used for recursive calls. */
 	private $_parentConfig = null;
-	/** Identifiant de l'élément dont le texte est interprété. */
-	private $_skrivElementId = null;
+	/** Hash containing the configuration parameters. */
+	private $_params = null;
 
+	/* ******************** CONSTRUCTION ****************** */
 	/**
-	 * Constructeur
-	 * @param	\Skriv\Markup\Config	$parentConfig	(optionnel) Objet de configuration parent, en cas d'appel récursif.
-	 * @param	int			$skrivElementId	(optionnel) Identifiant de l'élément Skriv dont le texte est interprété.
+	 * Constructor.
+	 * @param	array	$param		(optionnel) Hash containing specific configuration parameters.
+	 *					- int		skrivElementId		Identifier of the currently processed Skriv element.
+	 *					- bool		shortenLongUrl		Specifies if we must shorten URLs longer than 40 characters.
+	 *					- bool		processSkrivLinks	Specifies if we must process Skriv-specific URLs.
+	 *					- Closure	urlProcessFunction	URLs processing function.
+	 *					- string	footnotesPrefix		Prefix of footnotes' identifiers.
+	 *					- string	anchorsPrefix		Prefix of anchors' identifiers.
+	 * @param	\Skriv\Markup\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
-	public function __construct(\Skriv\Markup\Config $config=null, $skrivElementId=0) {
-		$this->_footnotesId = base_convert(rand(0, 50000), 10, 36);
+	public function __construct($param=null, \Skriv\Markup\Config $parentConfig=null) {
+		// creation of the default parameters array
+		$randomId = base_convert(rand(0, 50000), 10, 36);
+		$this->_params = array(
+			'skrivElementId'	=> null,
+			'shortenLongUrl'	=> true,
+			'processSkrivLinks'	=> false,
+			'urlProcessFunction'	=> null,
+			'anchorsPrefix'		=> "skriv-$randomId",
+			'footnotesPrefix'	=> "skriv-notes-$randomId"
+		);
+		// processing of specified parameters
+		if (isset($param['skrivElementId']))
+			$this->_params['skrivElementId'] = $param['skrivElementId'];
+		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
+			$this->_params['shortenLongUrl'] = false;
+		if (isset($param['processSkrivLinks']) && $param['processSkrivLinks'] === true)
+			$this->_params['processSkrivLinks'] = true;
+		if (isset($param['urlProcessFunction']) && is_a($param['urlProcessFunction'], 'Closure'))
+			$this->_params['urlProcessFunction'] = $param['urlProcessFunction'];
+		if (isset($param['anchorsPrefix']))
+			$this->_params['anchorsPrefix'] = $param['anchorsPrefix'];
+		if (isset($param['footnotesPrefix']))
+			$this->_params['footnotesPrefix'] = $param['footnotesPrefix'];
+		// storing the parent configuration object
+		$this->_parentConfig = $parentConfig;
+		// footnotes liste init
 		$this->_footnotes = array();
-		$this->_parentConfig = $config;
-		$this->_skrivElementId = $skrivElementId;
 	}
 	/**
-	 * Construit un objet du même type, "enfant" de l'objet courant, en l'initialisant correctement.
-	 * @param	\Skriv\Markup\Config	Un objet de configuration.
+	 * Build an object of the same type, "child" of the current object.
+	 * @return	\Skriv\Markup\Config	The new configuration object.
 	 */
 	public function subConstruct() {
-		return (new Config($this, $this->_skrivElementId));
+		return (new Config($this->_params, $this));
 	}
 	/**
-	 * methode invoquée avant le parsing
-	 * @param	string	$text	Le texte qui devait être parsé.
-	 * @return	string	Le texte qui sera effectivement parsé.
+	 * Returns a specific configuration parameter. If a parent configuration object exists, the parameter is asked to it.
+	 * @param	string	$param	Parameter's name.
+	 * @return	mixed	Value of the configuration parameter.
+	 */
+	public function getParam($param) {
+		if (isset($this->_parentConfig))
+			return ($this->_parentConfig->getParam($param));
+		return (isset($this->_params[$param]) ? $this->_params[$param] : null);
+	}
+	/**
+	 * Method called for pre-parse processing.
+	 * @param	string	$text	The input text.
+	 * @return	string	The text that will be parsed.
 	 */
 	public function onStart($text) {
-		// on commence par traiter les smileys et autres caractères particuliers
+		// process of smileys and other special characters
 		$text = Smiley::process($text);
-		// gestion des adresses email
+		// process of email addresses
 		$text = preg_replace_callback("/([\|\[ ]*[i\w:#\.-]+@[\w\.-]*[\w-]\.[\w\.-]+[\|\] ]*)/", function($matches) {
 			$str = trim($matches[0]);
 			$lastc = substr($str, -1);
@@ -81,54 +128,57 @@ class Config extends \WikiRenderer\Config  {
 				$result .= substr($str, strlen('mailto:')) . "|$str]]";
 			else
 				$result .= "$str|mailto:$str]]";
-			// on remet les espaces manquants au début
+			// set back spaces at the beginning
 			$result = str_repeat(' ', (strlen(rtrim($matches[0])) - strlen(trim($matches[0])))) . $result;
-			// on remet les espaces manquants à la fin
+			// set back spaces at the end
 			$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
 			return ($result);
 		}, $text);
-		// gestion des URL qui ne sont pas placées entre [[ et ]]
+		// process of URLs not written between [[ and ]]
 		$text = preg_replace_callback("/([\|\[ ]*\w+:\/\/[^\s\{\}\[\]\*]+[\|\] ]*)/", function($matches) {
 			$str = trim($matches[0]);
 			$lastc = substr($str, -1);
 			if ($str[0] == '|' || $str[0] == '[' || $lastc == ']' || $lastc == '|')
 				return ($matches[0]);
 			$result = "[[$str]]";
-			// on remet les espaces manquants au début
+			// set back spaces at the beginning
 			$result = str_repeat(' ', (strlen(rtrim($matches[0])) - strlen(trim($matches[0])))) . $result;
-			// on remet les espaces manquants à la fin
+			// set back spaces at the end
 			$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
 			return ($result);
 		}, $text);
-		// gestion des références vers des éléments Skriv (S#123) qui ne sont pas placées entre [[ et ]]
-		$text = preg_replace_callback("/([\|\[ ]*[sS]#\d+[\|\] ]*)/", function($matches) {
-			$str = trim($matches[0]);
-			$lastc = substr($str, -1);
-			if ($str[0] == '|' || $str[0] == '[' || $lastc == ']' || $lastc == '|')
-				return ($matches[0]);
-			$result = "[[$str]]";
-			// on remet les espaces manquants au début
-			$result = str_repeat(' ', (strlen(rtrim($matches[0])) - strlen(trim($matches[0])))) . $result;
-			// on remet les espaces manquants à la fin
-			$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
-			return ($result);
-		}, $text);
+		// Skriv-specific process
+		if ($this->getParam('processSkrivLinks')) {
+			// process of references to Skriv elements (like S#123) when they are not written between [[ and ]]
+			$text = preg_replace_callback("/([\|\[ ]*[sS]#\d+[\|\] ]*)/", function($matches) {
+				$str = trim($matches[0]);
+				$lastc = substr($str, -1);
+				if ($str[0] == '|' || $str[0] == '[' || $lastc == ']' || $lastc == '|')
+					return ($matches[0]);
+				$result = "[[$str]]";
+				// set back spaces at the beginning
+				$result = str_repeat(' ', (strlen(rtrim($matches[0])) - strlen(trim($matches[0])))) . $result;
+				// set back spaces at the end
+				$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
+				return ($result);
+			}, $text);
+		}
 		return ($text);
 	}
 	/**
-	 * methode invoquée aprés le parsing
-	 * @param	string	$finalText	???
+	 * Method called for post-parse processing.
+	 * @param	string	$finalText	The generated text.
+	 * @return	string	The text after post-processing.
 	 */
 	public function onParse($finalText) {
 		return ($finalText);
 	}
 	/**
-	 * Ajoute une note de bas de page.
-	 * @param	string	$text	Texte de la note de base de page.
-	 * @param	string	$label	(optionnel) Texte du label associé à la note.
-	 *				Si aucun label n'est fourni, un numéro auto-incrémenté
-	 *				sera utilisé.
-	 * @return	array	Hash contenant les clés 'id' et 'index'.
+	 * Add a footnote.
+	 * @param	string	$text	Footnote's text.
+	 * @param	string	$label	(optionnel) Footnote's label. If not given, an auto-incremented
+	 *				number will be used.
+	 * @return	array	Hash with 'id' and 'index' keys.
 	 */
 	public function addFootnote($text, $label=null) {
 		if (isset($this->_parentConfig))
@@ -142,21 +192,26 @@ class Config extends \WikiRenderer\Config  {
 			);
 		$index = count($this->_footnotes);
 		return (array(
-			'id'	=> $this->_footnotesId . "-$index",
+			'id'	=> $this->getParam('footnotesPrefix') . "-$index",
 			'index'	=> $index
 		));
 	}
 	/**
-	 * Retourne le texte des notes de bas de page.
-	 * @return	string	Le contenu.
+	 * Returns the footnotes content. By default, the rendered HTML is returned, but the
+	 * raw list of footnotes is available.
+	 * @param	bool	$raw	(optional) Set to True to get the raw list of footnotes.
+	 *				False by default.
+	 * @return	string|array	The footnotes' rendered HTML or the list of footnotes.
 	 */
-	public function getFootnotes() {
+	public function getFootnotes($raw=false) {
+		if ($raw === true)
+			return ($this->_footnotes);
 		if (empty($this->_footnotes))
-			return null;
+			return (null);
 		$footnotes = '';
 		$index = 1;
 		foreach ($this->_footnotes as $note) {
-			$id = $this->_footnotesId . "-$index";
+			$id = $this->getParam('footnotesPrefix') . "-$index";
 			$noteHtml = "<p class=\"footnote\"><a href=\"#cite_ref-$id\" name=\"cite_note-$id\" id=\"cite_note-$id\">";
 			if (is_string($note))
 				$noteHtml .= "$index</a>. $note";
@@ -170,37 +225,42 @@ class Config extends \WikiRenderer\Config  {
 		return ($footnotes);
 	}
 	/**
-	 * Traitement des liens. Les XSS Javascript sont détectés.
-	 * @param	string	$url		L'URL à traiter.
-	 * @param	string	$tagName	Le tag qui manipule cette URL.
-	 * @return	array	Tableau contenant l'URL traitée et le label généré.
+	 * Links processing.
+	 * @param	string	$url		The URL to process.
+	 * @param	string	$tagName	Name of the calling tag.
+	 * @return	array	Array with the processed URL and the generated label.
 	 */
 	public function processLink($url, $tagName='') {
 		$label = $url = trim($url);
-		if (strlen($label) > 40)
+		// shortening of long URLs
+		if ($this->getParam('shortenLongUrl') && strlen($label) > 40)
 			$label = substr($label, 0, 40) . '...';
-		// vérification pour sécurité
+		// Javascript XSS check
 		if (substr($url, 0, strlen('javascript:')) === 'javascript:')
 			$url = '#';
 		else {
-			// vérification pour les emails
+			// email check
 			if (filter_var($url, FILTER_VALIDATE_EMAIL))
 				$url = "mailto:$url";
 			else if (substr($url, 0, strlen('mailto:')) === 'mailto:')
 				$label = substr($url, strlen('mailto:'));
-			else {
-				// traitement des liens Skriv internes
+			else if ($this->getParam('processSkrivLinks')) {
+				// process of Skriv internal links
 				if (preg_match("/^#\d+$/", $url) === 1)
 					$url = '/' . substr($url, 1);
 				else if (preg_match("/^[sS]#\d+$/", $url) === 1) {
 					$label = substr($url, 1);
 					$url = '/' . substr($url, 2);
 				} else {
-					// traitement des pièces-jointes
+					// process of Skriv file attachments
 					if (isset($url[0]) && $url[0] != '/' && !preg_match("/^\w+:\/\//", $url))
 						$url = '/file/find/' . $this->_skrivElementId . "/$url";
 				}
 			}
+			// if a specific URL process function was defined, it is called
+			$func = $this->getParam('urlProcessFunction');
+			if (isset($func))
+				$url = $func($url);
 		}
 		
 		return (array($url, $label));
