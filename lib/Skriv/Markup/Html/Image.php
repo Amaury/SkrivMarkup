@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 class Image extends \WikiRenderer\TagXhtml {
 	protected $name = 'image';

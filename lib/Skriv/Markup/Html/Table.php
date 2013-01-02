@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 /**
  * traite les signes de types table

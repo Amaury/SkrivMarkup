@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 /** Gestion de texte monospace. */
 class Monospace extends \WikiRenderer\TagXhtml {

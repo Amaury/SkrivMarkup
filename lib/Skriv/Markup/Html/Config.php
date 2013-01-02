@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 /**
  * SkrivMarkup configuration object.
@@ -17,30 +17,30 @@ class Config extends \WikiRenderer\Config  {
 	/** List of inline markups. */
 	public $textLineContainers = array(
 		'\WikiRenderer\HtmlTextLine' => array(
-			'\Skriv\Markup\Strong',		// **strong**
-			'\Skriv\Markup\Em',		// ''em''
-			'\Skriv\Markup\Strikeout',	// --strikeout--
-			'\Skriv\Markup\Underline',	// __underline__
-			'\Skriv\Markup\Monospace',	// ##monospace##
-			'\Skriv\Markup\Superscript',	// ^^superscript^^
-			'\Skriv\Markup\Subscript',	// ,,subscript,,
-			'\Skriv\Markup\Abbr',		// ??abbr|text??
-			'\Skriv\Markup\Link',		// [[link|url]]		[[url]]
-			'\Skriv\Markup\Image',		// {{image|url}}	{{url}}
-			'\Skriv\Markup\Footnote'	// ((footnote))		((label|footnote))
+			'\Skriv\Markup\Html\Strong',		// **strong**
+			'\Skriv\Markup\Html\Em',		// ''em''
+			'\Skriv\Markup\Html\Strikeout',		// --strikeout--
+			'\Skriv\Markup\Html\Underline',		// __underline__
+			'\Skriv\Markup\Html\Monospace',		// ##monospace##
+			'\Skriv\Markup\Html\Superscript',	// ^^superscript^^
+			'\Skriv\Markup\Html\Subscript',		// ,,subscript,,
+			'\Skriv\Markup\Html\Abbr',		// ??abbr|text??
+			'\Skriv\Markup\Html\Link',		// [[link|url]]		[[url]]
+			'\Skriv\Markup\Html\Image',		// {{image|url}}	{{url}}
+			'\Skriv\Markup\Html\Footnote'		// ((footnote))		((label|footnote))
 		)
 	);
 	/** List of bloc markups. */
 	public $blocktags = array(
-		'\Skriv\Markup\Title',
-		'\Skriv\Markup\WikiList',
-		'\Skriv\Markup\Code',
-		'\Skriv\Markup\Pre',
-		'\Skriv\Markup\Hr',
-		'\Skriv\Markup\Blockquote',
-		'\Skriv\Markup\Table',
-		'\Skriv\Markup\StyledBlock',
-		'\Skriv\Markup\Paragraph',
+		'\Skriv\Markup\Html\Title',
+		'\Skriv\Markup\Html\WikiList',
+		'\Skriv\Markup\Html\Code',
+		'\Skriv\Markup\Html\Pre',
+		'\Skriv\Markup\Html\Hr',
+		'\Skriv\Markup\Html\Blockquote',
+		'\Skriv\Markup\Html\Table',
+		'\Skriv\Markup\Html\StyledBlock',
+		'\Skriv\Markup\Html\Paragraph',
 	);
 
 	/* ************ SKRIV MARKUP SPECIFIC ATTRIBUTES ************* */
@@ -57,28 +57,28 @@ class Config extends \WikiRenderer\Config  {
 	/**
 	 * Constructor.
 	 * @param	array	$param		(optionnel) Hash containing specific configuration parameters.
-	 *					- int		skrivElementId		Identifier of the currently processed Skriv element.
-	 *					- bool		processSkrivLinks	Specifies if we must process Skriv-specific URLs.
-	 *					- bool		shortenLongUrl		Specifies if we must shorten URLs longer than 40 characters.
-	 *					- Closure	urlProcessFunction	URLs processing function.
-	 *					- Closure	preParseFunction	Function for pre-parse process.
-	 *					- Closure	postParseFunction	Function for post-parse process.
-	 *					- string	anchorsPrefix		Prefix of anchors' identifiers.
-	 *					- string	footnotesPrefix		Prefix of footnotes' identifiers.
-	 * @param	\Skriv\Markup\Config	parentConfig	Parent configuration object, for recursive calls.
+	 *		- bool		shortenLongUrl		Specifies if we must shorten URLs longer than 40 characters. (default: true)
+	 *		- Closure	urlProcessFunction	URLs processing function. (default: null)
+	 *		- Closure	preParseFunction	Function for pre-parse process. (default: null)
+	 *		- Closure	postParseFunction	Function for post-parse process. (default: null)
+	 *		- string	anchorsPrefix		Prefix of anchors' identifiers. (default: "skriv-" + random value)
+	 *		- string	footnotesPrefix		Prefix of footnotes' identifiers. (default: "skriv-notes-" + random value)
+	 *		- int		skrivElementId		Identifier of the currently processed Skriv element. (default: null)
+	 *		- bool		processSkrivLinks	Specifies if we must process Skriv-specific URLs. (default: false)
+	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
-	public function __construct($param=null, \Skriv\Markup\Config $parentConfig=null) {
+	public function __construct($param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
 		// creation of the default parameters array
 		$randomId = base_convert(rand(0, 50000), 10, 36);
 		$this->_params = array(
-			'skrivElementId'	=> null,
 			'shortenLongUrl'	=> true,
-			'processSkrivLinks'	=> false,
 			'urlProcessFunction'	=> null,
 			'preParseFunction'	=> null,
 			'postParseFunction'	=> null,
 			'anchorsPrefix'		=> "skriv-$randomId",
-			'footnotesPrefix'	=> "skriv-notes-$randomId"
+			'footnotesPrefix'	=> "skriv-notes-$randomId",
+			'skrivElementId'	=> null,
+			'processSkrivLinks'	=> false,
 		);
 		// processing of specified parameters
 		if (isset($param['skrivElementId']))
@@ -104,7 +104,7 @@ class Config extends \WikiRenderer\Config  {
 	}
 	/**
 	 * Build an object of the same type, "child" of the current object.
-	 * @return	\Skriv\Markup\Config	The new configuration object.
+	 * @return	\Skriv\Markup\\Html\Config	The new configuration object.
 	 */
 	public function subConstruct() {
 		return (new Config($this->_params, $this));

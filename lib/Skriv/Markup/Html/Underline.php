@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 /** Gestion du texte souligné. */
 class Underline extends \WikiRenderer\TagXhtml {

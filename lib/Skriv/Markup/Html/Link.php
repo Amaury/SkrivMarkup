@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 class Link extends \WikiRenderer\TagXhtml {
 	protected $name = 'a';

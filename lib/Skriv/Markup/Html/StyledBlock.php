@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 /** Gestion des paragraphes avec style CSS. */
 class StyledBlock extends \WikiRenderer\Block {

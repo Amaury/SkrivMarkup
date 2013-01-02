@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 /** Gestion des paragraphes de code. */
 class Code extends \WikiRenderer\Block {

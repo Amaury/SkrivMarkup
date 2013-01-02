@@ -1,6 +1,6 @@
 <?php
 
-namespace Skriv\Markup;
+namespace Skriv\Markup\Html;
 
 /** Gestion des titres. */
 class Title extends \WikiRenderer\Block {
