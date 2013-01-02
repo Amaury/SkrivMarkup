@@ -1,5 +1,5 @@
 {
-    "name": "Amaury/SkrivMarkup",
+    "name": "amaury/skrivmarkup",
     "require": {
         "php": ">=5.3"
     },
