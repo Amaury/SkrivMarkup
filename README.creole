@@ -8,18 +8,20 @@ You need to install the [[http://github.com/Amaury/wikirenderer|PSR version]] of
 These libraries are PSR-0-compatible, so you'll also need an autoloader. You can use the [[https://github.com/Amaury/FineBase/blob/master/lib/FineAutoload.php|FineAutoload]] object from [[https://github.com/Amaury/FineBase|FineBase]].
 {{{
 <?php
- $text = "Some **Skriv** ''enabled'' text.";
 
- // configuration of the autoloader
- require_once('finebase/FineAutoload.php');
- FineAutoload::autoload();
- FineAutoload::addIncludePath('/path/to/SkrivMarkup/lib');
- FineAutoload::addIncludePath('/path/to/WikiRenderer/lib');
+$text = "Some **Skriv** ''enabled'' text.";
 
- // creation of the renderer object
- $renderer = \Skriv\Markup\Renderer:factory();
- // text to HTML processing
- $html = $renderer->render($text);
+// configuration of the autoloader
+require_once('finebase/FineAutoload.php');
+FineAutoload::autoload();
+FineAutoload::addIncludePath('/path/to/SkrivMarkup/lib');
+FineAutoload::addIncludePath('/path/to/WikiRenderer/lib');
+
+// creation of the renderer object
+$renderer = \Skriv\Markup\Renderer::factory();
+// text to HTML processing
+$html = $renderer->render($text);
+
 ?>
 }}}
 
