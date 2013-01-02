@@ -1,0 +1,11 @@
+{
+    "name": "Amaury/SkrivMarkup",
+    "require": {
+        "php": ">=5.3"
+    },
+    "autoload": {
+        "psr-0": {
+            "Skriv\\Markup": "lib/"
+        }
+    }
+}
