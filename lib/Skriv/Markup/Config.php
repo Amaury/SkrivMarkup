@@ -44,8 +44,10 @@ class Config extends \WikiRenderer\Config  {
 	);
 
 	/* ************ SKRIV MARKUP SPECIFIC ATTRIBUTES ************* */
-	/** List of the footnotes being created. */
+	/** List of the footnotes. */
 	private $_footnotes = null;
+	/** Tree representing the table of content. */
+	private $_toc = null;
 	/** Parent configuration object, used for recursive calls. */
 	private $_parentConfig = null;
 	/** Hash containing the configuration parameters. */
@@ -56,11 +58,13 @@ class Config extends \WikiRenderer\Config  {
 	 * Constructor.
 	 * @param	array	$param		(optionnel) Hash containing specific configuration parameters.
 	 *					- int		skrivElementId		Identifier of the currently processed Skriv element.
-	 *					- bool		shortenLongUrl		Specifies if we must shorten URLs longer than 40 characters.
 	 *					- bool		processSkrivLinks	Specifies if we must process Skriv-specific URLs.
+	 *					- bool		shortenLongUrl		Specifies if we must shorten URLs longer than 40 characters.
 	 *					- Closure	urlProcessFunction	URLs processing function.
-	 *					- string	footnotesPrefix		Prefix of footnotes' identifiers.
+	 *					- Closure	preParseFunction	Function for pre-parse process.
+	 *					- Closure	postParseFunction	Function for post-parse process.
 	 *					- string	anchorsPrefix		Prefix of anchors' identifiers.
+	 *					- string	footnotesPrefix		Prefix of footnotes' identifiers.
 	 * @param	\Skriv\Markup\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
 	public function __construct($param=null, \Skriv\Markup\Config $parentConfig=null) {
@@ -71,18 +75,24 @@ class Config extends \WikiRenderer\Config  {
 			'shortenLongUrl'	=> true,
 			'processSkrivLinks'	=> false,
 			'urlProcessFunction'	=> null,
+			'preParseFunction'	=> null,
+			'postParseFunction'	=> null,
 			'anchorsPrefix'		=> "skriv-$randomId",
 			'footnotesPrefix'	=> "skriv-notes-$randomId"
 		);
 		// processing of specified parameters
 		if (isset($param['skrivElementId']))
 			$this->_params['skrivElementId'] = $param['skrivElementId'];
-		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
-			$this->_params['shortenLongUrl'] = false;
 		if (isset($param['processSkrivLinks']) && $param['processSkrivLinks'] === true)
 			$this->_params['processSkrivLinks'] = true;
+		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
+			$this->_params['shortenLongUrl'] = false;
 		if (isset($param['urlProcessFunction']) && is_a($param['urlProcessFunction'], 'Closure'))
 			$this->_params['urlProcessFunction'] = $param['urlProcessFunction'];
+		if (isset($param['preParseFunction']) && is_a($param['preParseFunction'], 'Closure'))
+			$this->_params['preParseFunction'] = $param['preParseFunction'];
+		if (isset($param['postParseFunction']) && is_a($param['postParseFunction'], 'Closure'))
+			$this->_params['postParseFunction'] = $param['postParseFunction'];
 		if (isset($param['anchorsPrefix']))
 			$this->_params['anchorsPrefix'] = $param['anchorsPrefix'];
 		if (isset($param['footnotesPrefix']))
@@ -99,6 +109,8 @@ class Config extends \WikiRenderer\Config  {
 	public function subConstruct() {
 		return (new Config($this->_params, $this));
 	}
+
+	/* *************** PARAMETERS MANAGEMENT ************* */
 	/**
 	 * Returns a specific configuration parameter. If a parent configuration object exists, the parameter is asked to it.
 	 * @param	string	$param	Parameter's name.
@@ -109,6 +121,8 @@ class Config extends \WikiRenderer\Config  {
 			return ($this->_parentConfig->getParam($param));
 		return (isset($this->_params[$param]) ? $this->_params[$param] : null);
 	}
+
+	/* *************** PARSING MANAGEMENT **************** */
 	/**
 	 * Method called for pre-parse processing.
 	 * @param	string	$text	The input text.
@@ -163,6 +177,10 @@ class Config extends \WikiRenderer\Config  {
 				return ($result);
 			}, $text);
 		}
+		// if a specific pre-parse function was defined, it is called
+		$func = $this->getParam('preParseFunction');
+		if (isset($func))
+			$text = $func($text);
 		return ($text);
 	}
 	/**
@@ -171,8 +189,74 @@ class Config extends \WikiRenderer\Config  {
 	 * @return	string	The text after post-processing.
 	 */
 	public function onParse($finalText) {
+		// if a specific post-parse function was defined, it is called
+		$func = $this->getParam('postParseFunction');
+		if (isset($func))
+			$finalText = $func($finalText);
 		return ($finalText);
 	}
+	/**
+	 * Links processing.
+	 * @param	string	$url		The URL to process.
+	 * @param	string	$tagName	Name of the calling tag.
+	 * @return	array	Array with the processed URL and the generated label.
+	 */
+	public function processLink($url, $tagName='') {
+		$label = $url = trim($url);
+		// shortening of long URLs
+		if ($this->getParam('shortenLongUrl') && strlen($label) > 40)
+			$label = substr($label, 0, 40) . '...';
+		// Javascript XSS check
+		if (substr($url, 0, strlen('javascript:')) === 'javascript:')
+			$url = '#';
+		else {
+			// email check
+			if (filter_var($url, FILTER_VALIDATE_EMAIL))
+				$url = "mailto:$url";
+			else if (substr($url, 0, strlen('mailto:')) === 'mailto:')
+				$label = substr($url, strlen('mailto:'));
+			else if ($this->getParam('processSkrivLinks')) {
+				// process of Skriv internal links
+				if (preg_match("/^#\d+$/", $url) === 1)
+					$url = '/' . substr($url, 1);
+				else if (preg_match("/^[sS]#\d+$/", $url) === 1) {
+					$label = substr($url, 1);
+					$url = '/' . substr($url, 2);
+				} else {
+					// process of Skriv file attachments
+					if (isset($url[0]) && $url[0] != '/' && !preg_match("/^\w+:\/\//", $url))
+						$url = '/file/find/' . $this->_skrivElementId . "/$url";
+				}
+			}
+			// if a specific URL process function was defined, it is called
+			$func = $this->getParam('urlProcessFunction');
+			if (isset($func))
+				$url = $func($url);
+		}
+		
+		return (array($url, $label));
+	}
+
+	/* ******************** TOC MANAGEMENT *************** */
+	/**
+	 * Add a TOC entry.
+	 * @param	int	$depth	Depth in the tree.
+	 * @param	string	$title	Name of the new entry.
+	 */
+	public function addTOCEntry($depth, $title) {
+	}
+	/**
+	 * Returns the TOC content. By default, the rendered HTML is returned, but the
+	 * raw TOC tree is available.
+	 * @param	bool	$raw	(optional) Set to True to get the raw TOC tree. False by default.
+	 * @return	string|array	The TOC rendered HTML or the TOC tree.
+	 */
+	public function getTOC($raw=false) {
+		if ($raw === true)
+			return ($this->_toc);
+	}
+
+	/* ******************** FOOTNOTES MANAGEMENT **************** */
 	/**
 	 * Add a footnote.
 	 * @param	string	$text	Footnote's text.
@@ -223,47 +307,6 @@ class Config extends \WikiRenderer\Config  {
 		}
 		$footnotes = "<div class=\"footnotes\">\n$footnotes</div>\n";
 		return ($footnotes);
-	}
-	/**
-	 * Links processing.
-	 * @param	string	$url		The URL to process.
-	 * @param	string	$tagName	Name of the calling tag.
-	 * @return	array	Array with the processed URL and the generated label.
-	 */
-	public function processLink($url, $tagName='') {
-		$label = $url = trim($url);
-		// shortening of long URLs
-		if ($this->getParam('shortenLongUrl') && strlen($label) > 40)
-			$label = substr($label, 0, 40) . '...';
-		// Javascript XSS check
-		if (substr($url, 0, strlen('javascript:')) === 'javascript:')
-			$url = '#';
-		else {
-			// email check
-			if (filter_var($url, FILTER_VALIDATE_EMAIL))
-				$url = "mailto:$url";
-			else if (substr($url, 0, strlen('mailto:')) === 'mailto:')
-				$label = substr($url, strlen('mailto:'));
-			else if ($this->getParam('processSkrivLinks')) {
-				// process of Skriv internal links
-				if (preg_match("/^#\d+$/", $url) === 1)
-					$url = '/' . substr($url, 1);
-				else if (preg_match("/^[sS]#\d+$/", $url) === 1) {
-					$label = substr($url, 1);
-					$url = '/' . substr($url, 2);
-				} else {
-					// process of Skriv file attachments
-					if (isset($url[0]) && $url[0] != '/' && !preg_match("/^\w+:\/\//", $url))
-						$url = '/file/find/' . $this->_skrivElementId . "/$url";
-				}
-			}
-			// if a specific URL process function was defined, it is called
-			$func = $this->getParam('urlProcessFunction');
-			if (isset($func))
-				$url = $func($url);
-		}
-		
-		return (array($url, $label));
 	}
 }
 
