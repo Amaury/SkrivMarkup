@@ -1,0 +1,19 @@
+{
+    "name": "amaury/skrivmarkup",
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url" : "http://github.com/marmotz/wikirenderer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "amaury/wikirenderer": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Skriv\\Markup": "lib/"
+        }
+    }
+}
