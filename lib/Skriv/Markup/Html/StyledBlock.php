@@ -14,6 +14,8 @@ class StyledBlock extends \WikiRenderer\Block {
 	private $_currentContent = '';
 	/** Nombre de récursions. */
 	private $_recursionDepth = 0;
+	/** This object shouldn't be cloned. */
+	protected $_mustClone = false;
 
 	/**
 	 * Retourne le tag fermant, et positionne le flag interne pour dire qu'on est à l'intérieur d'un bloc stylisé.
