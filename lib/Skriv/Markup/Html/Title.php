@@ -23,6 +23,9 @@ class Title extends \WikiRenderer\Block {
 
 		$html = $this->_renderInlineTag($text);
 		$identifier = $this->engine->getConfig()->textToIdentifier($html);
+
+		$this->engine->getConfig()->addTocEntry($level, $html);
+
 		return ("<h$level id=\"" . $this->engine->getConfig()->getParam('anchorsPrefix') . "$identifier\">$html</h$level>");
 	}
 }

@@ -239,7 +239,10 @@ class Config extends \WikiRenderer\Config  {
 	 * @param	int	$depth	Depth in the tree.
 	 * @param	string	$title	Name of the new entry.
 	 */
-	public function addTOCEntry($depth, $title) {
+	public function addTocEntry($depth, $title) {
+		if (!isset($this->_toc))
+			$this->_toc = array();
+		$this->_addTocSubEntry($depth, $title, $this->_toc);
 	}
 	/**
 	 * Returns the TOC content. By default, the rendered HTML is returned, but the
@@ -247,9 +250,10 @@ class Config extends \WikiRenderer\Config  {
 	 * @param	bool	$raw	(optional) Set to True to get the raw TOC tree. False by default.
 	 * @return	string|array	The TOC rendered HTML or the TOC tree.
 	 */
-	public function getTOC($raw=false) {
+	public function getToc($raw=false) {
 		if ($raw === true)
-			return ($this->_toc);
+			return ($this->_toc['sub']);
+		throw new Exception("Not developed yet.");
 	}
 
 	/* ******************** FOOTNOTES MANAGEMENT **************** */
@@ -303,6 +307,29 @@ class Config extends \WikiRenderer\Config  {
 		}
 		$footnotes = "<div class=\"footnotes\">\n$footnotes</div>\n";
 		return ($footnotes);
+	}
+
+	/* ****************** PRIVATE METHODS ******************** */
+	/**
+	 * Add a sub-TOC entry.
+	 * @param	int	$depth	Depth in the tree.
+	 * @param	string	$title	Name of the new entry.
+	 * @param	array	$list	List of sibbling nodes.
+	 */
+	private function _addTocSubEntry($depth, $title, &$list) {
+		if (!isset($list['sub']))
+			$list['sub'] = array();
+		$offset = count($list['sub']);
+		if ($depth === 1) {
+			$list['sub'][$offset] = array(
+				'value' => $title
+			);
+			return;
+		}
+		$offset--;
+		if (!isset($list['sub'][$offset]))
+			$list['sub'][$offset] = array();
+		$this->_addTocSubEntry($depth - 1, $title, $list['sub'][$offset]);
 	}
 }
 

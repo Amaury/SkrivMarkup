@@ -11,6 +11,11 @@ namespace Skriv\Markup;
  * @see		WikiRenderer
  */
 class Renderer {
+	/** The configuration object. */
+	protected $_config = null;
+	/** The WikiRenderer object. */
+	protected $_wikiRenderer = null;
+
 	/**
 	 * Factory method. Creates a renderer object of the given type.
 	 * @param	string	$type	(optional) Type of rendering object. "html" by default.
@@ -26,10 +31,29 @@ class Renderer {
 	/**
 	 * Parses a Skriv text and generates a converted text.
 	 * @param	string	$text	The text to parse.
-	 * @return	string	The generated HTML stream.
-	 * @throws	Exception	Always thrown.
+	 * @return	string	The generated string.
 	 */
 	public function render($text) {
-		throw new Exception("This method should never be called.");
+		return ($this->_wikiRenderer->render($text));
+	}
+	/**
+         * Returns the TOC content. By default, the rendered string is returned, but the
+         * raw TOC tree is available.
+         * @param	bool	$raw	(optional) Set to True to get the raw TOC tree. False by default.
+         * @return	string|array	The TOC rendered string or the TOC tree.
+         */
+        public function getToc($raw=false) {
+		return ($this->_config->getToc($raw));
+	}
+	/**
+	 * Returns the footnotes content. By default, the rendered string is returned, but the
+	 * raw list of footnotes is available.
+	 * @param	bool	$raw	(optional) Set to True to get the raw list of footnotes.
+	 *				False by default.
+	 * @return	string|array	The footnotes' rendered string or the list of footnotes.
+	 */
+	public function getFootnotes($raw=false) {
+		return ($this->_config->getFootnotes($raw));
 	}
 }
+
