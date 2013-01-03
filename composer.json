@@ -1,12 +1,20 @@
 {
     "name": "amaury/skrivmarkup",
-    "minimum-stability": "dev",
-    "repositories": [
+    "description": "Interpreter of the Skriv Markup Language. PHP implementation.",
+    "type": "library",
+    "keywords": ["wiki", "Skriv"],
+    "license": "LGPL-2.1",
+    "authors": [
         {
-            "type": "vcs",
-            "url" : "http://github.com/marmotz/wikirenderer"
+            "name": "Amaury Bouchard",
+            "email": "amaury@amaury.net",
+            "homepage": "http://amaury.net",
+            "role": "Developer"
         }
     ],
+    "support": {
+        "source": "https://github.com/Amaury/SkrivMarkup"
+    },
     "require": {
         "php": ">=5.3",
         "amaury/wikirenderer": "*"
@@ -15,5 +23,12 @@
         "psr-0": {
             "Skriv\\Markup": "lib/"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url" : "http://github.com/Amaury/SkrivMarkup"
+        }
+    ]
 }
