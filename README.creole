@@ -22,6 +22,8 @@ $renderer = \Skriv\Markup\Renderer::factory();
 // text to HTML processing
 $html = $renderer->render($text);
 
+print($html); // <p>Some <strong>Skriv</strong> <em>enabled</em> text.</p>
+
 ?>
 }}}
 
@@ -29,7 +31,7 @@ $html = $renderer->render($text);
 Stay tuned for the future [[http://markup.skriv.org]] website. Meanwhile, you can find an excerpt in [[http://www.geek-directeur-technique.com/2012/12/31/skriv-markup-language/|this blog post]] (in french).
 
 ==License==
-This project was created by Amaury Bouchard (amaury@amaury.net), largely based on [[http://github.com/laurentj/wikirenderer|WikiRenderer]] from Laurent Jouanneau).
+This project was created by Amaury Bouchard (amaury@amaury.net), largely based on [[http://github.com/laurentj/wikirenderer|WikiRenderer]] from Laurent Jouanneau.
 
 It is placed under the terms of the [[http://www.gnu.org/licenses/lgpl-2.1.html|GNU Lesser General Public License 2.1]].
 

@@ -27,7 +27,8 @@ class Config extends \WikiRenderer\Config  {
 			'\Skriv\Markup\Html\Abbr',		// ??abbr|text??
 			'\Skriv\Markup\Html\Link',		// [[link|url]]		[[url]]
 			'\Skriv\Markup\Html\Image',		// {{image|url}}	{{url}}
-			'\Skriv\Markup\Html\Footnote'		// ((footnote))		((label|footnote))
+			'\Skriv\Markup\Html\Footnote',		// ((footnote))		((label|footnote))
+			'\Skriv\Markup\Html\Anchor',		// ~~anchor~~
 		)
 	);
 	/** List of bloc markups. */
@@ -61,13 +62,14 @@ class Config extends \WikiRenderer\Config  {
 	 *		- Closure	urlProcessFunction	URLs processing function. (default: null)
 	 *		- Closure	preParseFunction	Function for pre-parse process. (default: null)
 	 *		- Closure	postParseFunction	Function for post-parse process. (default: null)
+	 *		- Closure	textToIdentifier	Function that converts strings into HTML dientifiers. (default: null)
 	 *		- string	anchorsPrefix		Prefix of anchors' identifiers. (default: "skriv-" + random value)
 	 *		- string	footnotesPrefix		Prefix of footnotes' identifiers. (default: "skriv-notes-" + random value)
 	 *		- int		skrivElementId		Identifier of the currently processed Skriv element. (default: null)
 	 *		- bool		processSkrivLinks	Specifies if we must process Skriv-specific URLs. (default: false)
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
-	public function __construct($param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
+	public function __construct(array $param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
 		// creation of the default parameters array
 		$randomId = base_convert(rand(0, 50000), 10, 36);
 		$this->_params = array(
@@ -75,8 +77,9 @@ class Config extends \WikiRenderer\Config  {
 			'urlProcessFunction'	=> null,
 			'preParseFunction'	=> null,
 			'postParseFunction'	=> null,
-			'anchorsPrefix'		=> "skriv-$randomId",
-			'footnotesPrefix'	=> "skriv-notes-$randomId",
+			'textToIdentifier'	=> null,
+			'anchorsPrefix'		=> '',
+			'footnotesPrefix'	=> "skriv-notes-$randomId-",
 			'skrivElementId'	=> null,
 			'processSkrivLinks'	=> false,
 		);
@@ -93,6 +96,8 @@ class Config extends \WikiRenderer\Config  {
 			$this->_params['preParseFunction'] = $param['preParseFunction'];
 		if (isset($param['postParseFunction']) && is_a($param['postParseFunction'], 'Closure'))
 			$this->_params['postParseFunction'] = $param['postParseFunction'];
+		if (isset($param['textToIdentifier']) && is_a($param['textToIdentifier'], 'Closure'))
+			$this->_params['textToIdentifier'] = $param['textToIdentifier'];
 		if (isset($param['anchorsPrefix']))
 			$this->_params['anchorsPrefix'] = $param['anchorsPrefix'];
 		if (isset($param['footnotesPrefix']))
@@ -120,6 +125,34 @@ class Config extends \WikiRenderer\Config  {
 		if (isset($this->_parentConfig))
 			return ($this->_parentConfig->getParam($param));
 		return (isset($this->_params[$param]) ? $this->_params[$param] : null);
+	}
+
+	/* *************** TEXT MANAGEMENT ************* */
+	/**
+	 * Convert any string to a usable HTML identifier.
+	 * @param	string	$text	Input string.
+	 * @return	string	The converted string.
+	 */
+	public function textToIdentifier($text) {
+		$func = $this->getParam('textToIdentifier');
+		if (isset($func))
+			return ($func($text));
+		// conversion of accented characters
+		// see http://www.weirdog.com/blog/php/supprimer-les-accents-des-caracteres-accentues.html
+		$text = htmlentities($text, ENT_NOQUOTES, 'utf-8');
+		$text = preg_replace('#&([A-za-z])(?:acute|cedil|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $text);
+		$text = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $text);	// for ligatures e.g. '&oelig;'
+		$text = preg_replace('#&[^;]+;#', '', $text);			// strips other characters
+
+		$text = preg_replace("/[^a-zA-Z0-9_\.-]/", ' ', $text);		// remove any other characters
+		$text = str_replace(' ', '-', $text);
+		$text = preg_replace('/\s+/', " ", $text);
+		$text = preg_replace('/-+/', "-", $text);
+		$text = trim($text, '-');
+		$text = trim($text);
+		$text = empty($text) ? '-' : $text;
+
+		return ($text);
 	}
 
 	/* *************** PARSING MANAGEMENT **************** */

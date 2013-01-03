@@ -2,7 +2,14 @@
 
 namespace Skriv\Markup\Html;
 
-/** Gestion des titres. */
+/**
+ * Process of titles.
+ *
+ * @author	Amaury Bouchard <amaury@amaury.net>
+ * @copyright	© 2012-2013
+ * @package	SkrivMarkup
+ * @subpackage	Html
+ */
 class Title extends \WikiRenderer\Block {
 	public $type = 'title';
 	protected $regexp = "/^(={1,6})(.*)\s*$/";
@@ -15,7 +22,8 @@ class Title extends \WikiRenderer\Block {
 		$level = strlen($equals);
 
 		$html = $this->_renderInlineTag($text);
-		return "<h$level>$html</h$level>";
+		$identifier = $this->engine->getConfig()->textToIdentifier($html);
+		return ("<h$level id=\"" . $this->config->getParam('anchorsPrefix') . "$identifier\">$html</h$level>");
 	}
 }
 

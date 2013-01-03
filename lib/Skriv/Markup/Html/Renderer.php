@@ -10,7 +10,7 @@ namespace Skriv\Markup\Html;
  * @package	SkrivMarkup
  * @see		WikiRenderer
  */
-class Renderer {
+class Renderer extends \Skriv\Markup\Renderer {
 	/** The configuration object. */
 	private $_config = null;
 	/** The WikiRenderer object. */
@@ -28,7 +28,7 @@ class Renderer {
 	 *		- int		skrivElementId		Identifier of the currently processed Skriv element. (default: null)
 	 *		- bool		processSkrivLinks	Specifies if we must process Skriv-specific URLs. (default: false)
 	 */
-	public function __construct($params) {
+	public function __construct(array $params=null) {
 		$this->_config = new Config($params);
 		$this->_wikiRenderer = new \WikiRenderer\Renderer($this->_config);
 	}

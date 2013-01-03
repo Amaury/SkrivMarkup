@@ -18,7 +18,7 @@ class Renderer {
 	 * @return	\Skriv\Markup\Renderer	A rendering object.
 	 * @throws	Exception	If something goes wrong.
 	 */
-	static public function factory($type='html', $params=null) {
+	static public function factory($type='html', array $params=null) {
 		if (!isset($type) || !strcasecmp($type, 'html'))
 			return (new Html\Renderer($params));
 		throw new Exception("Unknown Skriv rendering type '$type'.");
