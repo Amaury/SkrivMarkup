@@ -65,8 +65,6 @@ class Config extends \WikiRenderer\Config  {
 	 *		- Closure	textToIdentifier	Function that converts strings into HTML dientifiers. (default: null)
 	 *		- string	anchorsPrefix		Prefix of anchors' identifiers. (default: "skriv-" + random value)
 	 *		- string	footnotesPrefix		Prefix of footnotes' identifiers. (default: "skriv-notes-" + random value)
-	 *		- int		skrivElementId		Identifier of the currently processed Skriv element. (default: null)
-	 *		- bool		processSkrivLinks	Specifies if we must process Skriv-specific URLs. (default: false)
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
 	public function __construct(array $param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
@@ -80,14 +78,8 @@ class Config extends \WikiRenderer\Config  {
 			'textToIdentifier'	=> null,
 			'anchorsPrefix'		=> '',
 			'footnotesPrefix'	=> "skriv-notes-$randomId-",
-			'skrivElementId'	=> null,
-			'processSkrivLinks'	=> false,
 		);
 		// processing of specified parameters
-		if (isset($param['skrivElementId']))
-			$this->_params['skrivElementId'] = $param['skrivElementId'];
-		if (isset($param['processSkrivLinks']) && $param['processSkrivLinks'] === true)
-			$this->_params['processSkrivLinks'] = true;
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
 			$this->_params['shortenLongUrl'] = false;
 		if (isset($param['urlProcessFunction']) && is_a($param['urlProcessFunction'], 'Closure'))
@@ -194,22 +186,6 @@ class Config extends \WikiRenderer\Config  {
 			$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
 			return ($result);
 		}, $text);
-		// Skriv-specific process
-		if ($this->getParam('processSkrivLinks')) {
-			// process of references to Skriv elements (like S#123) when they are not written between [[ and ]]
-			$text = preg_replace_callback("/([\|\[ ]*[sS]#\d+[\|\] ]*)/", function($matches) {
-				$str = trim($matches[0]);
-				$lastc = substr($str, -1);
-				if ($str[0] == '|' || $str[0] == '[' || $lastc == ']' || $lastc == '|')
-					return ($matches[0]);
-				$result = "[[$str]]";
-				// set back spaces at the beginning
-				$result = str_repeat(' ', (strlen(rtrim($matches[0])) - strlen(trim($matches[0])))) . $result;
-				// set back spaces at the end
-				$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
-				return ($result);
-			}, $text);
-		}
 		// if a specific pre-parse function was defined, it is called
 		$func = $this->getParam('preParseFunction');
 		if (isset($func))
@@ -248,23 +224,10 @@ class Config extends \WikiRenderer\Config  {
 				$url = "mailto:$url";
 			else if (substr($url, 0, strlen('mailto:')) === 'mailto:')
 				$label = substr($url, strlen('mailto:'));
-			else if ($this->getParam('processSkrivLinks')) {
-				// process of Skriv internal links
-				if (preg_match("/^#\d+$/", $url) === 1)
-					$url = '/' . substr($url, 1);
-				else if (preg_match("/^[sS]#\d+$/", $url) === 1) {
-					$label = substr($url, 1);
-					$url = '/' . substr($url, 2);
-				} else {
-					// process of Skriv file attachments
-					if (isset($url[0]) && $url[0] != '/' && !preg_match("/^\w+:\/\//", $url))
-						$url = '/file/find/' . $this->_skrivElementId . "/$url";
-				}
-			}
 			// if a specific URL process function was defined, it is called
 			$func = $this->getParam('urlProcessFunction');
 			if (isset($func))
-				$url = $func($url);
+				list($url, $label) = $func($url, $label);
 		}
 		
 		return (array($url, $label));
