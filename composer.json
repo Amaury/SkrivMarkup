@@ -1,7 +1,14 @@
 {
     "name": "amaury/skrivmarkup",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url" : "http://github.com/marmotz/wikirenderer"
+        }
+    ],
     "require": {
-        "php": ">=5.3"
+        "php": ">=5.3",
+        "amaury/wikirenderer": "*"
     },
     "autoload": {
         "psr-0": {
