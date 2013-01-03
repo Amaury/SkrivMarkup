@@ -28,7 +28,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url" : "http://github.com/Amaury/SkrivMarkup"
+            "url" : "http://github.com/Amaury/wikirenderer"
         }
     ]
 }
