@@ -24,11 +24,5 @@
             "Skriv\\Markup": "lib/"
         }
     },
-    "minimum-stability": "dev",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url" : "http://github.com/Amaury/wikirenderer"
-        }
-    ]
+    "minimum-stability": "dev"
 }
