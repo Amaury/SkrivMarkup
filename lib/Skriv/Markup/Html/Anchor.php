@@ -11,7 +11,7 @@ class Anchor extends \WikiRenderer\TagXhtml {
 
 	public function getContent() {
 		$identifier = $this->config->textToIdentifier($this->wikiContentArr[0]);
-		return ('<a id="' . $this->config->getParam('anchorsPrefix') . $identifier . '"></a>'
+		return ('<a id="' . $this->config->getParam('anchorsPrefix') . $identifier . '"></a>');
 	}
 }
 
