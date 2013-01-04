@@ -323,6 +323,7 @@ class Config extends \WikiRenderer\Config  {
 		$offset = count($list['sub']);
 		if ($depth === 1) {
 			$list['sub'][$offset] = array(
+				'id'    => $this->textToIdentifier($title),
 				'value' => $title
 			);
 			return;
