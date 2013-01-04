@@ -26,7 +26,7 @@ class Renderer {
 	static public function factory($type='html', array $params=null) {
 		if (!isset($type) || !strcasecmp($type, 'html'))
 			return (new Html\Renderer($params));
-		throw new Exception("Unknown Skriv rendering type '$type'.");
+		throw new \Exception("Unknown Skriv rendering type '$type'.");
 	}
 	/**
 	 * Parses a Skriv text and generates a converted text.
