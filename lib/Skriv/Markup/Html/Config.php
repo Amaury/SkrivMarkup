@@ -343,7 +343,7 @@ class Config extends \WikiRenderer\Config  {
 		$html = "<ul class=\"toc-list\">\n";
 		foreach ($list as $entry) {
 			$html .= "<li class=\"toc-entry\">\n";
-			$html .= '<a href="#' . $this->textToIdentifier($entry['value']) . '">'. $entry['value'] . "</a>\n";
+			$html .= '<a href="#' . $this->getParam('anchorsPrefix') . $this->textToIdentifier($entry['value']) . '">'. $entry['value'] . "</a>\n";
 			if (isset($entry['sub']))
 				$html .= $this->_getRenderedToc($entry['sub']);
 			$html .= "</li>\n";
