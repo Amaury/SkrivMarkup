@@ -1,0 +1,10 @@
+=SkrivMarkup unit tests=
+
+To run the SkrivMarkup unit tests, you need a full install of PHPUnit, and an install of [[http://github.com/Aamaury/FineBase|FineBase]]'s autoloader object (FineAutoload).
+
+Then, run these commands:
+{{{
+cd tests
+phpunit --configuration phpunit.xml
+}}}
+

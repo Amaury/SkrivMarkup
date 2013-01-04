@@ -55,5 +55,12 @@ class Renderer {
 	public function getFootnotes($raw=false) {
 		return ($this->_config->getFootnotes($raw));
 	}
+	/**
+	 * Returns the lines which contain an error.
+	 * @return	array	List of lines.
+	 */
+	public function getErrors() {
+		return ($this->_wikiRenderer->errors);
+	}
 }
 
