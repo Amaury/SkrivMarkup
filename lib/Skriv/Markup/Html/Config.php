@@ -253,7 +253,7 @@ class Config extends \WikiRenderer\Config  {
 	public function getToc($raw=false) {
 		if ($raw === true)
 			return ($this->_toc['sub']);
-		throw new Exception("Not developed yet.");
+		throw new \Exception("Not developed yet.");
 	}
 
 	/* ******************** FOOTNOTES MANAGEMENT **************** */
