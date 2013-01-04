@@ -253,7 +253,8 @@ class Config extends \WikiRenderer\Config  {
 	public function getToc($raw=false) {
 		if ($raw === true)
 			return ($this->_toc['sub']);
-		throw new Exception("Not developed yet.");
+		$html = $this->_getRenderedToc($this->_toc['sub']);
+		return ($html);
 	}
 
 	/* ******************** FOOTNOTES MANAGEMENT **************** */
@@ -330,6 +331,24 @@ class Config extends \WikiRenderer\Config  {
 		if (!isset($list['sub'][$offset]))
 			$list['sub'][$offset] = array();
 		$this->_addTocSubEntry($depth - 1, $title, $list['sub'][$offset]);
+	}
+	/**
+	 * Returns a chunk of rendered TOC.
+	 * @param	array	$list	List of TOC entries.
+	 * @return	string	The rendered chunk.
+	 */
+	private function _getRenderedToc($list) {
+		if (!isset($list) || empty($list))
+			return ('');
+		$html = "<ul class=\"toc-list\">\n";
+		foreach ($list as $entry) {
+			$html .= "<li class=\"toc-entry\">" . $entry['value'] . "\n";
+			if (isset($entry['sub']))
+				$html .= $this->_getRenderedToc($entry['sub']);
+			$html .= "</li>\n";
+		}
+		$html .= "</ul>\n";
+		return ($html);
 	}
 }
 
