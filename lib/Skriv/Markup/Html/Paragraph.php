@@ -21,6 +21,7 @@ class Paragraph extends \WikiRenderer\Block {
 		if (empty($string))
 			return (false);
 		if (!preg_match("/^\s*\*{2}.*\*{2}\s*.*$/", $string) &&
+		    !preg_match("/^\s*#{2}.*#{2}\s*.*$/", $string) &&
 		    preg_match("/^\s*[\*#\-\!\| \t>;<=].*/", $string))
 			return (false);
 		$this->_detectMatch = array($string, $string);

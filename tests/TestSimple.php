@@ -101,26 +101,6 @@ class TestSimple extends PHPUnit_Framework_TestCase {
 	/** Links test. */
 	public function testLinks() {
 		$tests = array(
-			'direct HTTP'	=> array(
-				'http://skriv.org',
-				'<p><a href="http://skriv.org">http://skriv.org</a></p>'
-			),
-			'direct FTP'	=> array(
-				'ftp://server.com/path/file.jpg',
-				'<p><a href="ftp://server.com/path/file.jpg">ftp://server.com/path/file.jpg</a></p>'
-			),
-			'direct email'	=> array(
-				'amaury@amaury.net',
-				'<p><a href="mailto:amaury@amaury.net">amaury@amaury.net</a></p>'
-			),
-			'direct mailto'	=> array(
-				'mailto:amaury@amaury.net',
-				'<p><a href="mailto:amaury@amaury.net">amaury@amaury.net</a></p>'
-			),
-			'direct long URL'	=> array(
-				'http://server.com/very/very/very/long/url/like/you/never/saw/on/the/internet',
-				'<p><a href="http://server.com/very/very/very/long/url/like/you/never/saw/on/the/internet">http://server.com/very/very/very/long/ur...</a></p>'
-			),
 			'simple link'	=> array(
 				'[[http://skriv.org]]',
 				'<p><a href="http://skriv.org">http://skriv.org</a></p>'
@@ -153,7 +133,7 @@ class TestSimple extends PHPUnit_Framework_TestCase {
 		$tests = array(
 			'simple'	=> array(
 				'{{http://skriv.org/logo.png}}',
-				'<p><img src="http://skriv.org/logo.png" /></p>'
+				'<p><img src="http://skriv.org/logo.png" alt="http://skriv.org/logo.png" /></p>'
 			),
 			'titled'	=> array(
 				'{{Skriv | http://skriv.org/logo2.png}}',

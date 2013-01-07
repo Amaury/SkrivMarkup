@@ -156,6 +156,7 @@ class Config extends \WikiRenderer\Config  {
 	public function onStart($text) {
 		// process of smileys and other special characters
 		$text = Smiley::process($text);
+		/*
 		// process of email addresses
 		$text = preg_replace_callback("/([\|\[ ]*[i\w:#\.-]+@[\w\.-]*[\w-]\.[\w\.-]+[\|\] ]*)/", function($matches) {
 			$str = trim($matches[0]);
@@ -186,6 +187,7 @@ class Config extends \WikiRenderer\Config  {
 			$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
 			return ($result);
 		}, $text);
+		*/
 		// if a specific pre-parse function was defined, it is called
 		$func = $this->getParam('preParseFunction');
 		if (isset($func))
@@ -323,8 +325,8 @@ class Config extends \WikiRenderer\Config  {
 		$offset = count($list['sub']);
 		if ($depth === 1) {
 			$list['sub'][$offset] = array(
-				'id'    => $this->textToIdentifier($title),
-				'value' => $title
+				'id'	=> $this->textToIdentifier($title),
+				'value'	=> $title
 			);
 			return;
 		}

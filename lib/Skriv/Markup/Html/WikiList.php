@@ -20,7 +20,8 @@ class WikiList extends \WikiRenderer\Block {
 	public function detect($string, $inBloc=false) {
 		if (!preg_match($this->regexp, $string, $this->_detectMatch))
 			return (0);
-		if ($inBloc !== true && substr($string, 0, 2) == "**" && strpos(substr($string, 2), "**") !== false)
+		if ($inBloc !== true && ((substr($string, 0, 2) == '**' && strpos($string, '**', 2) !== false) ||
+					 (substr($string, 0, 2) == '##' && strpos($string, '##', 2) !== false)))
 			return (0);
 		return (1);
 	}
