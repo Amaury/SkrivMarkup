@@ -42,10 +42,11 @@ class Code extends \WikiRenderer\Block {
 	}
 	/**
 	 * Détecte si on est au début ou à la fin d'un bloc de code.
-	 * @param	string	$string	La chaîne à analyser.
+	 * @param	string	$string		La chaîne à analyser.
+	 * @param	bool	$inBlock	(optional) True if the parser is already in the block.
 	 * @return	bool	True si le début ou la fin de bloc a été trouvée.
 	 */
-	public function detect($string) {
+	public function detect($string, $inBlock=false) {
 		$this->_detectMatch = false;
 		if ($this->isOpen) {
 			if (isset($string[2]) && $string[0] === ']' && $string[1] === ']' && $string[2] === ']') {

@@ -14,14 +14,15 @@ class WikiList extends \WikiRenderer\Block {
 
 	/**
 	 * test si la chaine correspond au debut ou au contenu d'un bloc
-	 * @param string   $string
-	 * @return boolean   true: appartient au bloc
+	 * @param	string	$string
+	 * @param	bool	$inBlock	(optional) True if the parser is already in the block.
+	 * @return	boolean	true: appartient au bloc
 	 */
-	public function detect($string, $inBloc=false) {
+	public function detect($string, $inBlock=false) {
 		if (!preg_match($this->regexp, $string, $this->_detectMatch))
 			return (0);
-		if ($inBloc !== true && ((substr($string, 0, 2) == '**' && strpos($string, '**', 2) !== false) ||
-					 (substr($string, 0, 2) == '##' && strpos($string, '##', 2) !== false)))
+		if ($inBlock !== true && ((substr($string, 0, 2) == '**' && strpos($string, '**', 2) !== false) ||
+					  (substr($string, 0, 2) == '##' && strpos($string, '##', 2) !== false)))
 			return (0);
 		return (1);
 	}

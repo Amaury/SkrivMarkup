@@ -14,10 +14,11 @@ class Paragraph extends \WikiRenderer\Block {
 
 	/**
 	 * Détection des paragraphes
-	 * @param	string	$string	Ligne de texte servant pour la détection.
+	 * @param	string	$string		Ligne de texte servant pour la détection.
+	 * @param	bool	$inBlock	(optional) True is the parser is already in the block.
 	 * @return	bool	True si c'est un paragraphe.
 	 */
-	public function detect($string) {
+	public function detect($string, $inBlock=false) {
 		if (empty($string))
 			return (false);
 		if (!preg_match("/^\s*\*{2}.*\*{2}\s*.*$/", $string) &&
