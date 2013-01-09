@@ -141,7 +141,7 @@ class TestSimple extends PHPUnit_Framework_TestCase {
 			),
 			'linked'	=> array(
 				'[[ {{Skriv|http://skriv.org/logo3.png}} | http://skriv.org]]',
-				'<p><a href="http://skriv.org"><img src="http://skriv.org/logo3.png" title="Skriv" /></a></p>'
+				'<p><a href="http://skriv.org"><img src="http://skriv.org/logo3.png" alt="Skriv" /></a></p>'
 			)
 		);
 		$this->_executeTests($tests);

@@ -1,4 +1,4 @@
-=Skriv Markup=
+=SkrivMarkup=
 
 Interpreter of the Skriv Markup Language. PHP implementation.
 
@@ -27,8 +27,8 @@ print($html); // <p>Some <strong>Skriv</strong> <em>enabled</em> text.</p>
 ?>
 }}}
 
-==Skriv syntax==
-Stay tuned for the future [[http://markup.skriv.org]] website. Meanwhile, you can find an excerpt in [[http://www.geek-directeur-technique.com/2012/12/31/skriv-markup-language/|this blog post]] (in french).
+==Documentation==
+The full documentation of [[http://markup.skriv.org/language/syntax|Skriv Markup Language syntax]] and [[http://markup.skriv.org/php/usage|SkrivMarkup PHP interpreter]] is available on the [[http://markup.skriv.org]] website.
 
 ==License==
 This project was created by Amaury Bouchard (amaury@amaury.net), largely based on [[http://github.com/laurentj/wikirenderer|WikiRenderer]] from Laurent Jouanneau.

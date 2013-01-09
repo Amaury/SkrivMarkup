@@ -22,7 +22,7 @@ class Title extends \WikiRenderer\Block {
 		$level = strlen($equals);
 
 		$html = $this->_renderInlineTag($text);
-		$identifier = $this->engine->getConfig()->textToIdentifier($html);
+		$identifier = $this->engine->getConfig()->titleToIdentifier($level, $html);
 
 		$this->engine->getConfig()->addTocEntry($level, $html);
 
