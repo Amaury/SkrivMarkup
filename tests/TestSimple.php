@@ -17,6 +17,10 @@ class TestSimple extends PHPUnit_Framework_TestCase {
 				"aaa bbb ccc",
 				"<p>aaa bbb ccc</p>"
 			),
+			'html'	=> array(
+				"3 < 5 > 2 < 8 & 4 > 2",
+				"<p>3 &lt; 5 &gt; 2 &lt; 8 &amp; 4 &gt; 2</p>"
+			),
 			'strong'	=> array(
 				"aaa **bbb** ccc",
 				"<p>aaa <strong>bbb</strong> ccc</p>"
