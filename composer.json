@@ -17,7 +17,7 @@
     },
     "require": {
         "php": ">=5.3",
-        "amaury/wikirenderer": "*"
+        "amaury/wikirenderer": "dev-master"
     },
     "autoload": {
         "psr-0": {
