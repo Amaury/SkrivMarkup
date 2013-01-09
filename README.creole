@@ -2,29 +2,39 @@
 
 Interpreter of the Skriv Markup Language. PHP implementation.
 
-==How to use it==
-You need to install the [[http://github.com/Amaury/wikirenderer|PSR version]] of [[http://github.com/laurentj/wikirenderer|WikiRenderer]].
+==Install==
+SkrivMarkup can be installed using [[http://getcomposer.org|Composer]].
 
-These libraries are PSR-0-compatible, so you'll also need an autoloader. You can use the [[https://github.com/Amaury/FineBase/blob/master/lib/FineAutoload.php|FineAutoload]] object from [[https://github.com/Amaury/FineBase|FineBase]].
+In your project directory, create a {{{composer.json}}} file:
+{{{
+{
+    "require": {
+        "amaury/wikirenderer": "dev-master",
+        "amaury/skrivmarkup": "dev-master"
+    }
+}
+}}}
+
+Then, use Composer to fetch packages:
+{{{php composer.phar install}}}
+
+
+==How to use it==
+Once you have installed the needed packages with Composer, you can use SkrivMarkup.
 {{{
 <?php
 
-$text = "Some **Skriv** ''enabled'' text.";
-
-// configuration of the autoloader
-require_once('finebase/FineAutoload.php');
-FineAutoload::autoload();
-FineAutoload::addIncludePath('/path/to/SkrivMarkup/lib');
-FineAutoload::addIncludePath('/path/to/WikiRenderer/lib');
+require_once('vendor/autoload.php');
 
 // creation of the renderer object
 $renderer = \Skriv\Markup\Renderer::factory();
+
 // text to HTML processing
+$text = "Some **Skriv** ''enabled'' text.";
 $html = $renderer->render($text);
 
 print($html); // <p>Some <strong>Skriv</strong> <em>enabled</em> text.</p>
 
-?>
 }}}
 
 ==Documentation==
