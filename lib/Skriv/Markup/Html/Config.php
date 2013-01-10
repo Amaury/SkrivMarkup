@@ -78,6 +78,8 @@ class Config extends \WikiRenderer\Config  {
 			'textToIdentifier'	=> null,
 			'anchorsPrefix'		=> '',
 			'footnotesPrefix'	=> "skriv-notes-$randomId-",
+			'codeRenderer'		=> 'prettyprint',
+			'codeLineNumbers'	=> true
 		);
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
@@ -94,6 +96,10 @@ class Config extends \WikiRenderer\Config  {
 			$this->_params['anchorsPrefix'] = $param['anchorsPrefix'];
 		if (isset($param['footnotesPrefix']))
 			$this->_params['footnotesPrefix'] = $param['footnotesPrefix'];
+		if (isset($param['codeRenderer']) && !strcasecmp($param['codeRenderer'], 'geshi'))
+			$this->_params['codeRenderer'] = 'geshi';
+		if (isset($param['codeLineNumbers']) && $param['codeLineNumbers'] === false)
+			$this->_params['codeLineNumbers'] = false;
 		// storing the parent configuration object
 		$this->_parentConfig = $parentConfig;
 		// footnotes liste init
