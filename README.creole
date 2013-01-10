@@ -1,34 +1,44 @@
-=Skriv Markup=
+=SkrivMarkup=
 
 Interpreter of the Skriv Markup Language. PHP implementation.
 
-==How to use it==
-You need to install the [[http://github.com/Amaury/wikirenderer|PSR version]] of [[http://github.com/laurentj/wikirenderer|WikiRenderer]].
+==Install==
+SkrivMarkup can be installed using [[http://getcomposer.org|Composer]].
 
-These libraries are PSR-0-compatible, so you'll also need an autoloader. You can use the [[https://github.com/Amaury/FineBase/blob/master/lib/FineAutoload.php|FineAutoload]] object from [[https://github.com/Amaury/FineBase|FineBase]].
+In your project directory, create a {{{composer.json}}} file:
+{{{
+{
+    "require": {
+        "amaury/wikirenderer": "dev-master",
+        "amaury/skrivmarkup": "dev-master"
+    }
+}
+}}}
+
+Then, use Composer to fetch packages:
+{{{php composer.phar install}}}
+
+
+==How to use it==
+Once you have installed the needed packages with Composer, you can use SkrivMarkup.
 {{{
 <?php
 
-$text = "Some **Skriv** ''enabled'' text.";
-
-// configuration of the autoloader
-require_once('finebase/FineAutoload.php');
-FineAutoload::autoload();
-FineAutoload::addIncludePath('/path/to/SkrivMarkup/lib');
-FineAutoload::addIncludePath('/path/to/WikiRenderer/lib');
+require_once('vendor/autoload.php');
 
 // creation of the renderer object
 $renderer = \Skriv\Markup\Renderer::factory();
+
 // text to HTML processing
+$text = "Some **Skriv** ''enabled'' text.";
 $html = $renderer->render($text);
 
 print($html); // <p>Some <strong>Skriv</strong> <em>enabled</em> text.</p>
 
-?>
 }}}
 
-==Skriv syntax==
-Stay tuned for the future [[http://markup.skriv.org]] website. Meanwhile, you can find an excerpt in [[http://www.geek-directeur-technique.com/2012/12/31/skriv-markup-language/|this blog post]] (in french).
+==Documentation==
+The full documentation of [[http://markup.skriv.org/language/syntax|Skriv Markup Language syntax]] and [[http://markup.skriv.org/php/usage|SkrivMarkup PHP interpreter]] is available on the [[http://markup.skriv.org]] website.
 
 ==License==
 This project was created by Amaury Bouchard (amaury@amaury.net), largely based on [[http://github.com/laurentj/wikirenderer|WikiRenderer]] from Laurent Jouanneau.

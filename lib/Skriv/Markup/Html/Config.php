@@ -59,10 +59,12 @@ class Config extends \WikiRenderer\Config  {
 	 * Constructor.
 	 * @param	array	$param		(optionnel) Hash containing specific configuration parameters.
 	 *		- bool		shortenLongUrl		Specifies if we must shorten URLs longer than 40 characters. (default: true)
+	 *		- bool		convertSmileys		Specifies if we must convert smileys. (default: true)
+	 *		- bool		convertSymbols		Specifies if we must convert symbols. (default: true)
 	 *		- Closure	urlProcessFunction	URLs processing function. (default: null)
 	 *		- Closure	preParseFunction	Function for pre-parse process. (default: null)
 	 *		- Closure	postParseFunction	Function for post-parse process. (default: null)
-	 *		- Closure	textToIdentifier	Function that converts strings into HTML dientifiers. (default: null)
+	 *		- Closure	titleToIdFunction	Function that converts title strings into HTML identifiers. (default: null)
 	 *		- string	anchorsPrefix		Prefix of anchors' identifiers. (default: "skriv-" + random value)
 	 *		- string	footnotesPrefix		Prefix of footnotes' identifiers. (default: "skriv-notes-" + random value)
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
@@ -72,10 +74,12 @@ class Config extends \WikiRenderer\Config  {
 		$randomId = base_convert(rand(0, 50000), 10, 36);
 		$this->_params = array(
 			'shortenLongUrl'	=> true,
+			'convertSmileys'	=> true,
+			'convertSymbols'	=> true,
 			'urlProcessFunction'	=> null,
 			'preParseFunction'	=> null,
 			'postParseFunction'	=> null,
-			'textToIdentifier'	=> null,
+			'titleToIdFunction'	=> null,
 			'anchorsPrefix'		=> '',
 			'footnotesPrefix'	=> "skriv-notes-$randomId-",
 			'codeRenderer'		=> 'prettyprint',
@@ -84,14 +88,18 @@ class Config extends \WikiRenderer\Config  {
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
 			$this->_params['shortenLongUrl'] = false;
+		if (isset($param['convertSmileys']) && $param['convertSmileys'] === false)
+			$this->_params['convertSmileys'] = false;
+		if (isset($param['convertSymbols']) && $param['convertSymbols'] === false)
+			$this->_params['convertymbols'] = false;
 		if (isset($param['urlProcessFunction']) && is_a($param['urlProcessFunction'], 'Closure'))
 			$this->_params['urlProcessFunction'] = $param['urlProcessFunction'];
 		if (isset($param['preParseFunction']) && is_a($param['preParseFunction'], 'Closure'))
 			$this->_params['preParseFunction'] = $param['preParseFunction'];
 		if (isset($param['postParseFunction']) && is_a($param['postParseFunction'], 'Closure'))
 			$this->_params['postParseFunction'] = $param['postParseFunction'];
-		if (isset($param['textToIdentifier']) && is_a($param['textToIdentifier'], 'Closure'))
-			$this->_params['textToIdentifier'] = $param['textToIdentifier'];
+		if (isset($param['titleToIdFunction']) && is_a($param['titleToIdFunction'], 'Closure'))
+			$this->_params['titleToIdFunction'] = $param['titleToIdFunction'];
 		if (isset($param['anchorsPrefix']))
 			$this->_params['anchorsPrefix'] = $param['anchorsPrefix'];
 		if (isset($param['footnotesPrefix']))
@@ -127,14 +135,15 @@ class Config extends \WikiRenderer\Config  {
 
 	/* *************** TEXT MANAGEMENT ************* */
 	/**
-	 * Convert any string to a usable HTML identifier.
+	 * Convert title string to a usable HTML identifier.
+	 * @param	int	$depth	Depth of the title.
 	 * @param	string	$text	Input string.
 	 * @return	string	The converted string.
 	 */
-	public function textToIdentifier($text) {
-		$func = $this->getParam('textToIdentifier');
+	public function titleToIdentifier($depth, $text) {
+		$func = $this->getParam('titleToIdFunction');
 		if (isset($func))
-			return ($func($text));
+			return ($func($depth, $text));
 		// conversion of accented characters
 		// see http://www.weirdog.com/blog/php/supprimer-les-accents-des-caracteres-accentues.html
 		$text = htmlentities($text, ENT_NOQUOTES, 'utf-8');
@@ -161,7 +170,10 @@ class Config extends \WikiRenderer\Config  {
 	 */
 	public function onStart($text) {
 		// process of smileys and other special characters
-		$text = Smiley::process($text);
+		if ($this->getParam('convertSmileys'))
+			$text = Smiley::convertSmileys($text);
+		if ($this->getParam('convertSymbols'))
+			$text = Smiley::convertSymbols($text);
 		/*
 		// process of email addresses
 		$text = preg_replace_callback("/([\|\[ ]*[i\w:#\.-]+@[\w\.-]*[\w-]\.[\w\.-]+[\|\] ]*)/", function($matches) {
@@ -250,7 +262,7 @@ class Config extends \WikiRenderer\Config  {
 	public function addTocEntry($depth, $title) {
 		if (!isset($this->_toc))
 			$this->_toc = array();
-		$this->_addTocSubEntry($depth, $title, $this->_toc);
+		$this->_addTocSubEntry($depth, $depth, $title, $this->_toc);
 	}
 	/**
 	 * Returns the TOC content. By default, the rendered HTML is returned, but the
@@ -322,16 +334,17 @@ class Config extends \WikiRenderer\Config  {
 	/**
 	 * Add a sub-TOC entry.
 	 * @param	int	$depth	Depth in the tree.
+	 * @param	int	$level	Level of the title.
 	 * @param	string	$title	Name of the new entry.
 	 * @param	array	$list	List of sibbling nodes.
 	 */
-	private function _addTocSubEntry($depth, $title, &$list) {
+	private function _addTocSubEntry($depth, $level, $title, &$list) {
 		if (!isset($list['sub']))
 			$list['sub'] = array();
 		$offset = count($list['sub']);
 		if ($depth === 1) {
 			$list['sub'][$offset] = array(
-				'id'	=> $this->textToIdentifier($title),
+				'id'	=> $this->titleToIdentifier($level, $title),
 				'value'	=> $title
 			);
 			return;
@@ -339,22 +352,23 @@ class Config extends \WikiRenderer\Config  {
 		$offset--;
 		if (!isset($list['sub'][$offset]))
 			$list['sub'][$offset] = array();
-		$this->_addTocSubEntry($depth - 1, $title, $list['sub'][$offset]);
+		$this->_addTocSubEntry($depth - 1, $level, $title, $list['sub'][$offset]);
 	}
 	/**
 	 * Returns a chunk of rendered TOC.
 	 * @param	array	$list	List of TOC entries.
+	 * @param	int	$depth	(optional) Depth in the tree. 1 by default.
 	 * @return	string	The rendered chunk.
 	 */
-	private function _getRenderedToc($list) {
+	private function _getRenderedToc($list, $depth=1) {
 		if (!isset($list) || empty($list))
 			return ('');
 		$html = "<ul class=\"toc-list\">\n";
 		foreach ($list as $entry) {
 			$html .= "<li class=\"toc-entry\">\n";
-			$html .= '<a href="#' . $this->getParam('anchorsPrefix') . $this->textToIdentifier($entry['value']) . '">'. $entry['value'] . "</a>\n";
+			$html .= '<a href="#' . $this->getParam('anchorsPrefix') . $this->titleToIdentifier($depth, $entry['value']) . '">'. $entry['value'] . "</a>\n";
 			if (isset($entry['sub']))
-				$html .= $this->_getRenderedToc($entry['sub']);
+				$html .= $this->_getRenderedToc($entry['sub'], ($depth + 1));
 			$html .= "</li>\n";
 		}
 		$html .= "</ul>\n";

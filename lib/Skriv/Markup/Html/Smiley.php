@@ -3,7 +3,7 @@
 namespace Skriv\Markup\Html;
 
 class Smiley {
-	static private $_from = array(
+	static private $_smileysFrom = array(
 		':-)',
 		':-(',
 		':-D',
@@ -14,7 +14,9 @@ class Smiley {
 		':-x',
 		":'-(",
 		':-@',
-		':-*',
+		':-*'
+	);
+	static private $_symbolsFrom = array(
 		':sun:',
 		':cloud:',
 		':umbrella:',
@@ -59,7 +61,7 @@ class Smiley {
 		':_L_:', ':_M_:', ':_N_:', ':_O_:', ':_P_:', ':_Q_:', ':_R_:', ':_S_:', ':_T_:', ':_U_:', ':_V_:',
 		':_W_:', ':_X_:', ':_Y_:', ':_Z_:'
 	);
-	static private $_to = array(
+	static private $_smileysTo = array(
 		'☺',
 		'☹',
 		'😃',
@@ -70,7 +72,9 @@ class Smiley {
 		'😶',
 		'😥',
 		'😠',
-		'😘',
+		'😘'
+	);
+	static private $_symbolsTo = array(
 		'☀',
 		'☁',
 		'☂',
@@ -116,8 +120,11 @@ class Smiley {
 		'Ⓦ', 'Ⓧ', 'Ⓨ', 'Ⓩ'
 	);
 
-	static public function process($string) {
-		return (str_replace(self::$_from, self::$_to, $string));
+	static public function convertSmileys($string) {
+		return (str_replace(self::$_smileysFrom, self::$_smileysTo, $string));
+	}
+	static public function convertSymbols($string) {
+		return (str_replace(self::$_symbolsFrom, self::$_symbolsTo, $string));
 	}
 }
 
