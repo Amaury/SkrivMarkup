@@ -25,6 +25,7 @@ class Title extends \WikiRenderer\Block {
 		$identifier = $this->engine->getConfig()->titleToIdentifier($level, $html);
 
 		$this->engine->getConfig()->addTocEntry($level, $html);
+		$level += $this->engine->getConfig()->getParam('firstTitleLevel') - 1;
 
 		return ("<h$level id=\"" . $this->engine->getConfig()->getParam('anchorsPrefix') . "$identifier\">$html</h$level>");
 	}

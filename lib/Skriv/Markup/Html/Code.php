@@ -19,14 +19,13 @@ class Code extends \WikiRenderer\Block {
 	 */
 	public function open() {
 		$this->isOpen = true;
-		if (empty($this->_programmingLanguage))
+		if (empty($this->_programmingLanguage) || !$this->engine->getConfig()->getParam('codeRenderer'))
 			return ('<pre>');
-		if ($this->engine->getConfig()->getParam('codeRenderer') === 'prettyprint') {
-			$html = '<pre class="prettyprint';
-			$html .= $this->engine->getConfig()->getParam('codeLineNumbers') ? ' linenums' : '';
-			$html .= '><code class="' . htmlspecialchars($this->_programmingLanguage) . '">';
-			return ($html);
-		}
+		$html = '<pre class="prettyprint';
+		if ($this->engine->getConfig()->getParam('codeLineNumbers'))
+			$html .= ' linenums';
+		$html .= '"><code class="' . htmlspecialchars($this->_programmingLanguage) . '">';
+		return ($html);
 	}
 	/**
 	 * Retourne le tag fermant, et positionne le flag interne pour dire qu'on n'est plus à l'intérieur d'un bloc stylisé.
@@ -34,7 +33,7 @@ class Code extends \WikiRenderer\Block {
 	 */
 	public function close() {
 		$this->isOpen = false;
-		if (empty($this->_programmingLanguage))
+		if (empty($this->_programmingLanguage) || !$this->engine->getConfig()->getParam('codeRenderer'))
 			return ('</pre>');
 		return ('</code></pre>');
 	}

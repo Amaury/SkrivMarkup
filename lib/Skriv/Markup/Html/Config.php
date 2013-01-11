@@ -67,6 +67,9 @@ class Config extends \WikiRenderer\Config  {
 	 *		- Closure	titleToIdFunction	Function that converts title strings into HTML identifiers. (default: null)
 	 *		- string	anchorsPrefix		Prefix of anchors' identifiers. (default: "skriv-" + random value)
 	 *		- string	footnotesPrefix		Prefix of footnotes' identifiers. (default: "skriv-notes-" + random value)
+	 *		- bool		codeSyntaxHighlight	Activate code highlighting. (default: true)
+	 *		- bool		codeLineNumbers		Line numbers in code blocks. (default: true)
+	 *		- int		firstTitleLevel		Offset of first level titles. (default: 1)
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
 	public function __construct(array $param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
@@ -82,8 +85,8 @@ class Config extends \WikiRenderer\Config  {
 			'titleToIdFunction'	=> null,
 			'anchorsPrefix'		=> '',
 			'footnotesPrefix'	=> "skriv-notes-$randomId-",
-			'codeRenderer'		=> 'prettyprint',
-			'codeLineNumbers'	=> true
+			'codeLineNumbers'	=> true,
+			'firstTitleLevel'	=> 1
 		);
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
@@ -104,10 +107,13 @@ class Config extends \WikiRenderer\Config  {
 			$this->_params['anchorsPrefix'] = $param['anchorsPrefix'];
 		if (isset($param['footnotesPrefix']))
 			$this->_params['footnotesPrefix'] = $param['footnotesPrefix'];
-		if (isset($param['codeRenderer']) && !strcasecmp($param['codeRenderer'], 'geshi'))
-			$this->_params['codeRenderer'] = 'geshi';
+		if (isset($param['codeSyntaxHighlight']) && $param['codeSyntaxHighlight'] === true)
+			$this->_params['codeSyntaxHighlight'] = $param['codeSyntaxHighlight'];
 		if (isset($param['codeLineNumbers']) && $param['codeLineNumbers'] === false)
 			$this->_params['codeLineNumbers'] = false;
+		if (isset($param['firstTitleLevel']) && is_numeric($param['firstTitleLevel']) &&
+		    $param['firstTitleLevel'] >= 1 && $param['firstTitleLevel'] <= 6)
+			$this->_params['firstTitleLevel'] = $param['firstTitleLevel'];
 		// storing the parent configuration object
 		$this->_parentConfig = $parentConfig;
 		// footnotes liste init
