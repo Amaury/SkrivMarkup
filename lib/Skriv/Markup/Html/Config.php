@@ -88,7 +88,7 @@ class Config extends \WikiRenderer\Config  {
 			'footnotesPrefix'	=> "skriv-notes-$randomId-",
 			'codeLineNumbers'	=> true,
 			'firstTitleLevel'	=> 1,
-			'targetBlank'		=> false
+			'targetBlank'		=> null
 		);
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
@@ -116,7 +116,7 @@ class Config extends \WikiRenderer\Config  {
 		if (isset($param['firstTitleLevel']) && is_numeric($param['firstTitleLevel']) &&
 		    $param['firstTitleLevel'] >= 1 && $param['firstTitleLevel'] <= 6)
 			$this->_params['firstTitleLevel'] = $param['firstTitleLevel'];
-		if (isset($param['targetBlank']) && $param['targetBlank'] === true)
+		if (isset($param['targetBlank']) && is_bool($param['targetBlank']))
 			$this->_params['targetBlank'] = $param['targetBlank'];
 		// storing the parent configuration object
 		$this->_parentConfig = $parentConfig;
@@ -239,9 +239,13 @@ class Config extends \WikiRenderer\Config  {
 	 * @param	string	$url		The URL to process.
 	 * @param	string	$tagName	Name of the calling tag.
 	 * @return	array	Array with the processed URL and the generated label.
+	 *			Third parameter is about blank targeting of the link. It could be
+	 *			null (use the default behaviour), true (add a blank targeting) or
+	 *			false (no blank targeting).
 	 */
 	public function processLink($url, $tagName='') {
 		$label = $url = trim($url);
+		$targetBlank = $this->getParam('targetBlank');
 		// shortening of long URLs
 		if ($this->getParam('shortenLongUrl') && strlen($label) > 40)
 			$label = substr($label, 0, 40) . '...';
@@ -250,17 +254,20 @@ class Config extends \WikiRenderer\Config  {
 			$url = '#';
 		else {
 			// email check
-			if (filter_var($url, FILTER_VALIDATE_EMAIL))
+			if (filter_var($url, FILTER_VALIDATE_EMAIL)) {
 				$url = "mailto:$url";
-			else if (substr($url, 0, strlen('mailto:')) === 'mailto:')
+				$targetBlank = false;
+			} else if (substr($url, 0, strlen('mailto:')) === 'mailto:') {
 				$label = substr($url, strlen('mailto:'));
+				$targetBlank = false;
+			}
 			// if a specific URL process function was defined, it is called
 			$func = $this->getParam('urlProcessFunction');
 			if (isset($func))
-				list($url, $label) = $func($url, $label);
+				list($url, $label, $targetBlank) = $func($url, $label, $targetBlank);
 		}
 		
-		return (array($url, $label));
+		return (array($url, $label, $targetBlank));
 	}
 
 	/* ******************** TOC MANAGEMENT *************** */
