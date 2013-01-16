@@ -71,6 +71,7 @@ class Config extends \WikiRenderer\Config  {
 	 *		- bool		codeLineNumbers		Line numbers in code blocks. (default: true)
 	 *		- int		firstTitleLevel		Offset of first level titles. (default: 1)
 	 *		- bool		targetBlank		Add "target='_blank'" to every links.
+	 *		- bool		nofollow		Add "rel='nofollow'" to every links.
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
 	public function __construct(array $param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
@@ -88,7 +89,8 @@ class Config extends \WikiRenderer\Config  {
 			'footnotesPrefix'	=> "skriv-notes-$randomId-",
 			'codeLineNumbers'	=> true,
 			'firstTitleLevel'	=> 1,
-			'targetBlank'		=> null
+			'targetBlank'		=> null,
+			'nofollow'		=> null
 		);
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
@@ -118,6 +120,8 @@ class Config extends \WikiRenderer\Config  {
 			$this->_params['firstTitleLevel'] = $param['firstTitleLevel'];
 		if (isset($param['targetBlank']) && is_bool($param['targetBlank']))
 			$this->_params['targetBlank'] = $param['targetBlank'];
+		if (isset($param['nofollow']) && is_bool($param['nofollow']))
+			$this->_params['nofollow'] = $param['nofollow'];
 		// storing the parent configuration object
 		$this->_parentConfig = $parentConfig;
 		// footnotes liste init
@@ -184,38 +188,6 @@ class Config extends \WikiRenderer\Config  {
 			$text = Smiley::convertSmileys($text);
 		if ($this->getParam('convertSymbols'))
 			$text = Smiley::convertSymbols($text);
-		/*
-		// process of email addresses
-		$text = preg_replace_callback("/([\|\[ ]*[i\w:#\.-]+@[\w\.-]*[\w-]\.[\w\.-]+[\|\] ]*)/", function($matches) {
-			$str = trim($matches[0]);
-			$lastc = substr($str, -1);
-			if ($str[0] == '|' || $str[0] == '[' || $lastc == ']' || $lastc == '|')
-				return ($matches[0]);
-			$result = '[[';
-			if (substr($str, 0, strlen('mailto:')) === 'mailto:')
-				$result .= substr($str, strlen('mailto:')) . "|$str]]";
-			else
-				$result .= "$str|mailto:$str]]";
-			// set back spaces at the beginning
-			$result = str_repeat(' ', (strlen(rtrim($matches[0])) - strlen(trim($matches[0])))) . $result;
-			// set back spaces at the end
-			$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
-			return ($result);
-		}, $text);
-		// process of URLs not written between [[ and ]]
-		$text = preg_replace_callback("/([\|\[ ]*\w+:\/\/[^\s\{\}\[\]\*]+[\|\] ]*)/", function($matches) {
-			$str = trim($matches[0]);
-			$lastc = substr($str, -1);
-			if ($str[0] == '|' || $str[0] == '[' || $lastc == ']' || $lastc == '|')
-				return ($matches[0]);
-			$result = "[[$str]]";
-			// set back spaces at the beginning
-			$result = str_repeat(' ', (strlen(rtrim($matches[0])) - strlen(trim($matches[0])))) . $result;
-			// set back spaces at the end
-			$result .= str_repeat(' ', (strlen(ltrim($matches[0])) - strlen(trim($matches[0]))));
-			return ($result);
-		}, $text);
-		*/
 		// if a specific pre-parse function was defined, it is called
 		$func = $this->getParam('preParseFunction');
 		if (isset($func))
@@ -246,6 +218,7 @@ class Config extends \WikiRenderer\Config  {
 	public function processLink($url, $tagName='') {
 		$label = $url = trim($url);
 		$targetBlank = $this->getParam('targetBlank');
+		$nofollow = $this->getParam('nofollow');
 		// shortening of long URLs
 		if ($this->getParam('shortenLongUrl') && strlen($label) > 40)
 			$label = substr($label, 0, 40) . '...';
@@ -256,18 +229,18 @@ class Config extends \WikiRenderer\Config  {
 			// email check
 			if (filter_var($url, FILTER_VALIDATE_EMAIL)) {
 				$url = "mailto:$url";
-				$targetBlank = false;
+				$targetBlank = $nofollow = false;
 			} else if (substr($url, 0, strlen('mailto:')) === 'mailto:') {
 				$label = substr($url, strlen('mailto:'));
-				$targetBlank = false;
+				$targetBlank = $nofollow = false;
 			}
 			// if a specific URL process function was defined, it is called
 			$func = $this->getParam('urlProcessFunction');
 			if (isset($func))
-				list($url, $label, $targetBlank) = $func($url, $label, $targetBlank);
+				list($url, $label, $targetBlank, $nofollow) = $func($url, $label, $targetBlank, $nofollow);
 		}
 		
-		return (array($url, $label, $targetBlank));
+		return (array($url, $label, $targetBlank, $nofollow));
 	}
 
 	/* ******************** TOC MANAGEMENT *************** */
