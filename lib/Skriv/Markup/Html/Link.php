@@ -10,7 +10,7 @@ class Link extends \WikiRenderer\TagXhtml {
 	public $separators = array('|');
 
 	public function getContent() {
-		// gestion du paramètre unique
+		// management of single parameter
 		if ($this->separatorCount == 0) {
 			$this->separatorCount = 1;
 			$href = $this->wikiContentArr[0];
@@ -22,7 +22,12 @@ class Link extends \WikiRenderer\TagXhtml {
 		}
 		$this->contents[0] = trim($this->contents[0]);
 		$this->wikiContentArr[1] = $href;
-		// on retourne le lien généré
+		// management of the target
+		if ($this->config->getParam('targetBlank'))
+			$this->additionnalAttributes['target'] = '_blank';
+		else
+			unset($this->additionnalAttributes['target']);
+		// link generation
 		return parent::getContent();
 	}
 }

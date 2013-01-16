@@ -70,6 +70,7 @@ class Config extends \WikiRenderer\Config  {
 	 *		- bool		codeSyntaxHighlight	Activate code highlighting. (default: true)
 	 *		- bool		codeLineNumbers		Line numbers in code blocks. (default: true)
 	 *		- int		firstTitleLevel		Offset of first level titles. (default: 1)
+	 *		- bool		targetBlank		Add "target='_blank'" to every links.
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
 	public function __construct(array $param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
@@ -86,7 +87,8 @@ class Config extends \WikiRenderer\Config  {
 			'anchorsPrefix'		=> '',
 			'footnotesPrefix'	=> "skriv-notes-$randomId-",
 			'codeLineNumbers'	=> true,
-			'firstTitleLevel'	=> 1
+			'firstTitleLevel'	=> 1,
+			'targetBlank'		=> false
 		);
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
@@ -114,6 +116,8 @@ class Config extends \WikiRenderer\Config  {
 		if (isset($param['firstTitleLevel']) && is_numeric($param['firstTitleLevel']) &&
 		    $param['firstTitleLevel'] >= 1 && $param['firstTitleLevel'] <= 6)
 			$this->_params['firstTitleLevel'] = $param['firstTitleLevel'];
+		if (isset($param['targetBlank']) && $param['targetBlank'] === true)
+			$this->_params['targetBlank'] = $param['targetBlank'];
 		// storing the parent configuration object
 		$this->_parentConfig = $parentConfig;
 		// footnotes liste init
