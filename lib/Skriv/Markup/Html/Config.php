@@ -72,6 +72,7 @@ class Config extends \WikiRenderer\Config  {
 	 *		- int		firstTitleLevel		Offset of first level titles. (default: 1)
 	 *		- bool		targetBlank		Add "target='_blank'" to every links.
 	 *		- bool		nofollow		Add "rel='nofollow'" to every links.
+	 *		- bool		addFootnotes		Add footnotes' content at the end of the page.
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
 	public function __construct(array $param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
@@ -90,7 +91,8 @@ class Config extends \WikiRenderer\Config  {
 			'codeLineNumbers'	=> true,
 			'firstTitleLevel'	=> 1,
 			'targetBlank'		=> null,
-			'nofollow'		=> null
+			'nofollow'		=> null,
+			'addFootnotes'		=> false
 		);
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
@@ -122,6 +124,8 @@ class Config extends \WikiRenderer\Config  {
 			$this->_params['targetBlank'] = $param['targetBlank'];
 		if (isset($param['nofollow']) && is_bool($param['nofollow']))
 			$this->_params['nofollow'] = $param['nofollow'];
+		if (isset($param['addFootnotes']) && $param['addFootnotes'] === true)
+			$this->_params['addFootnotes'] = $param['addFootnotes'];
 		// storing the parent configuration object
 		$this->_parentConfig = $parentConfig;
 		// footnotes liste init
@@ -204,6 +208,12 @@ class Config extends \WikiRenderer\Config  {
 		$func = $this->getParam('postParseFunction');
 		if (isset($func))
 			$finalText = $func($finalText);
+		// add footnotes' content if needed
+		if ($this->getParam('addFootnotes')) {
+			$footnotes = $this->getFootnotes();
+			if (!empty($footnotes))
+				$finalText .= "\n" . $footnotes;
+		}
 		return ($finalText);
 	}
 	/**
