@@ -19,7 +19,7 @@ class Code extends \WikiRenderer\Block {
 	 */
 	public function open() {
 		$this->isOpen = true;
-		if (empty($this->_programmingLanguage) || !$this->engine->getConfig()->getParam('codeRenderer'))
+		if (empty($this->_programmingLanguage) || !$this->engine->getConfig()->getParam('codeSyntaxHighlight'))
 			return ('<pre>');
 		$html = '<pre class="prettyprint';
 		if ($this->engine->getConfig()->getParam('codeLineNumbers'))
@@ -33,7 +33,7 @@ class Code extends \WikiRenderer\Block {
 	 */
 	public function close() {
 		$this->isOpen = false;
-		if (empty($this->_programmingLanguage) || !$this->engine->getConfig()->getParam('codeRenderer'))
+		if (empty($this->_programmingLanguage) || !$this->engine->getConfig()->getParam('codeSyntaxHighlight'))
 			return ('</pre>');
 		return ('</code></pre>');
 	}

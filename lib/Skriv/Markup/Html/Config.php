@@ -82,12 +82,13 @@ class Config extends \WikiRenderer\Config  {
 			'shortenLongUrl'	=> true,
 			'convertSmileys'	=> true,
 			'convertSymbols'	=> true,
+			'anchorsPrefix'		=> '',
+			'footnotesPrefix'	=> "skriv-notes-$randomId-",
 			'urlProcessFunction'	=> null,
 			'preParseFunction'	=> null,
 			'postParseFunction'	=> null,
 			'titleToIdFunction'	=> null,
-			'anchorsPrefix'		=> '',
-			'footnotesPrefix'	=> "skriv-notes-$randomId-",
+			'codeSyntaxHighlight'	=> true,
 			'codeLineNumbers'	=> true,
 			'firstTitleLevel'	=> 1,
 			'targetBlank'		=> null,
@@ -101,6 +102,10 @@ class Config extends \WikiRenderer\Config  {
 			$this->_params['convertSmileys'] = false;
 		if (isset($param['convertSymbols']) && $param['convertSymbols'] === false)
 			$this->_params['convertymbols'] = false;
+		if (isset($param['anchorsPrefix']))
+			$this->_params['anchorsPrefix'] = $param['anchorsPrefix'];
+		if (isset($param['footnotesPrefix']))
+			$this->_params['footnotesPrefix'] = $param['footnotesPrefix'];
 		if (isset($param['urlProcessFunction']) && is_a($param['urlProcessFunction'], 'Closure'))
 			$this->_params['urlProcessFunction'] = $param['urlProcessFunction'];
 		if (isset($param['preParseFunction']) && is_a($param['preParseFunction'], 'Closure'))
@@ -109,11 +114,7 @@ class Config extends \WikiRenderer\Config  {
 			$this->_params['postParseFunction'] = $param['postParseFunction'];
 		if (isset($param['titleToIdFunction']) && is_a($param['titleToIdFunction'], 'Closure'))
 			$this->_params['titleToIdFunction'] = $param['titleToIdFunction'];
-		if (isset($param['anchorsPrefix']))
-			$this->_params['anchorsPrefix'] = $param['anchorsPrefix'];
-		if (isset($param['footnotesPrefix']))
-			$this->_params['footnotesPrefix'] = $param['footnotesPrefix'];
-		if (isset($param['codeSyntaxHighlight']) && $param['codeSyntaxHighlight'] === true)
+		if (isset($param['codeSyntaxHighlight']) && $param['codeSyntaxHighlight'] === false)
 			$this->_params['codeSyntaxHighlight'] = $param['codeSyntaxHighlight'];
 		if (isset($param['codeLineNumbers']) && $param['codeLineNumbers'] === false)
 			$this->_params['codeLineNumbers'] = false;
