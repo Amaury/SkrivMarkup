@@ -18,13 +18,22 @@ class Title extends \WikiRenderer\Block {
 	public function getRenderedLine() {
 		$equals = $this->_detectMatch[1];
 		$text = trim($this->_detectMatch[2]);
-		$text = rtrim(rtrim($text, '='));
 		$level = strlen($equals);
+		$identifier = '';
 
+		if (($offset = strrpos($text, $equals)) !== false && $offset > 0) {
+			if ($text[$offset - 1] == '\\')
+				$text = substr($text, 0, $offset - 1) . substr($text, $offset);
+			else {
+				$identifier = trim(substr($text, $offset + $level));
+				$text = trim(substr($text, 0, $offset));
+			}
+		}
 		$html = $this->_renderInlineTag($text);
-		$identifier = $this->engine->getConfig()->titleToIdentifier($level, $html);
+		$identifier = empty($identifier) ? $text : $identifier;
+		$identifier = $this->engine->getConfig()->titleToIdentifier($level, $identifier);
 
-		$this->engine->getConfig()->addTocEntry($level, $html);
+		$this->engine->getConfig()->addTocEntry($level, $html, $identifier);
 		$level += $this->engine->getConfig()->getParam('firstTitleLevel') - 1;
 
 		return ("<h$level id=\"" . $this->engine->getConfig()->getParam('anchorsPrefix') . "$identifier\">$html</h$level>");

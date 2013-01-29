@@ -257,13 +257,14 @@ class Config extends \WikiRenderer\Config  {
 	/* ******************** TOC MANAGEMENT *************** */
 	/**
 	 * Add a TOC entry.
-	 * @param	int	$depth	Depth in the tree.
-	 * @param	string	$title	Name of the new entry.
+	 * @param	int	$depth		Depth in the tree.
+	 * @param	string	$title		Name of the new entry.
+	 * @param	string	$identifier	Identifier of the new entry.
 	 */
-	public function addTocEntry($depth, $title) {
+	public function addTocEntry($depth, $title, $identifier) {
 		if (!isset($this->_toc))
 			$this->_toc = array();
-		$this->_addTocSubEntry($depth, $depth, $title, $this->_toc);
+		$this->_addTocSubEntry($depth, $depth, $title, $identifier, $this->_toc);
 	}
 	/**
 	 * Returns the TOC content. By default, the rendered HTML is returned, but the
@@ -334,18 +335,19 @@ class Config extends \WikiRenderer\Config  {
 	/* ****************** PRIVATE METHODS ******************** */
 	/**
 	 * Add a sub-TOC entry.
-	 * @param	int	$depth	Depth in the tree.
-	 * @param	int	$level	Level of the title.
-	 * @param	string	$title	Name of the new entry.
-	 * @param	array	$list	List of sibbling nodes.
+	 * @param	int	$depth		Depth in the tree.
+	 * @param	int	$level		Level of the title.
+	 * @param	string	$title		Name of the new entry.
+	 * @param	string	$identifier	Identifier of the new entry.
+	 * @param	array	$list		List of sibbling nodes.
 	 */
-	private function _addTocSubEntry($depth, $level, $title, &$list) {
+	private function _addTocSubEntry($depth, $level, $title, $identifier, &$list) {
 		if (!isset($list['sub']))
 			$list['sub'] = array();
 		$offset = count($list['sub']);
 		if ($depth === 1) {
 			$list['sub'][$offset] = array(
-				'id'	=> $this->titleToIdentifier($level, $title),
+				'id'	=> $identifier,
 				'value'	=> $title
 			);
 			return;
@@ -353,7 +355,7 @@ class Config extends \WikiRenderer\Config  {
 		$offset--;
 		if (!isset($list['sub'][$offset]))
 			$list['sub'][$offset] = array();
-		$this->_addTocSubEntry($depth - 1, $level, $title, $list['sub'][$offset]);
+		$this->_addTocSubEntry($depth - 1, $level, $title, $identifier, $list['sub'][$offset]);
 	}
 	/**
 	 * Returns a chunk of rendered TOC.
