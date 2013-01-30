@@ -73,6 +73,7 @@ class Config extends \WikiRenderer\Config  {
 	 *		- bool		targetBlank		Add "target='_blank'" to every links.
 	 *		- bool		nofollow		Add "rel='nofollow'" to every links.
 	 *		- bool		addFootnotes		Add footnotes' content at the end of the page.
+	 *		- bool		codeInlineStyles	Activate inline styles in code blocks. (default: false)
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
 	public function __construct(array $param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
@@ -93,7 +94,8 @@ class Config extends \WikiRenderer\Config  {
 			'firstTitleLevel'	=> 1,
 			'targetBlank'		=> null,
 			'nofollow'		=> null,
-			'addFootnotes'		=> false
+			'addFootnotes'		=> false,
+			'codeInlineStyles'	=> false
 		);
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
@@ -127,6 +129,8 @@ class Config extends \WikiRenderer\Config  {
 			$this->_params['nofollow'] = $param['nofollow'];
 		if (isset($param['addFootnotes']) && $param['addFootnotes'] === true)
 			$this->_params['addFootnotes'] = $param['addFootnotes'];
+		if (isset($param['codeInlineStyles']) && $param['codeInlineStyles'] === true)
+			$this->_params['codeInlineStyles'] = $param['codeInlineStyles'];
 		// storing the parent configuration object
 		$this->_parentConfig = $parentConfig;
 		// footnotes liste init
