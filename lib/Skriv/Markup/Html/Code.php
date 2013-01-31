@@ -15,7 +15,7 @@ class Code extends \WikiRenderer\Block {
 	/** Raw content of the code block. */
 	private $_currentContent = '';
 	/** GeSHi object. */
-	private $_geshi = null;
+	static private $_geshi = null;
 
 	/**
 	 * Retourne le tag fermant, et positionne le flag interne pour dire qu'on est à l'intérieur d'un bloc stylisé.
@@ -46,13 +46,13 @@ class Code extends \WikiRenderer\Block {
 		if (!$this->engine->getConfig()->getParam('codeSyntaxHighlight') || !class_exists('\GeSHi'))
 			return ('<pre><code class="language-' . $this->_programmingLanguage . '">' . htmlspecialchars($currentContent) . '</code></pre>');
 		// syntax highlighting
-		if (!isset($this->_geshi))
-			$this->_geshi = new \GeSHi('', '');
-		$this->_geshi->set_source($currentContent);
-		$this->_geshi->set_language($this->_programmingLanguage);
-		$this->_geshi->enable_classes($this->engine->getConfig()->getParam('codeInlineStyles') ? false : true);
-		$this->_geshi->enable_line_numbers($this->engine->getConfig()->getParam('codeLineNumbers') ? GESHI_NORMAL_LINE_NUMBERS : GESHI_NO_LINE_NUMBERS);
-		$result = $this->_geshi->parse_code();
+		if (!isset(self::$_geshi))
+			self::$_geshi = new \GeSHi('', '');
+		self::$_geshi->set_source($currentContent);
+		self::$_geshi->set_language($this->_programmingLanguage);
+		self::$_geshi->enable_classes($this->engine->getConfig()->getParam('codeInlineStyles') ? false : true);
+		self::$_geshi->enable_line_numbers($this->engine->getConfig()->getParam('codeLineNumbers') ? GESHI_NORMAL_LINE_NUMBERS : GESHI_NO_LINE_NUMBERS);
+		$result = self::$_geshi->parse_code();
 		$start = '<pre class="' . $this->_programmingLanguage . '"';
 		if (substr($result, 0, strlen($start)) == $start)
 			$result = '<pre class="language-' . $this->_programmingLanguage . '"' . substr($result, strlen($start));
