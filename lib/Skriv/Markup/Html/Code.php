@@ -31,22 +31,24 @@ class Code extends \WikiRenderer\Block {
 	 */
 	public function close() {
 		$this->_programmingLanguage = str_replace(array('/', '\\', '..'), '', $this->_programmingLanguage);
+		$currentContent = $this->_currentContent;
+		$this->_currentContent = '';
 		// remove the last carriage-return
-		$last2 = substr($this->_currentContent, -2);
+		$last2 = substr($currentContent, -2);
 		if ($last2 === "\r\n" || $last2 == "\n\r")
-			$this->_currentContent = substr($this->_currentContent, 0, -2);
+			$currentContent = substr($currentContent, 0, -2);
 		else if (isset($last2[1]) && ($last2[1] == "\r" || $last2[1] == "\n"))
-			$this->_currentContent = substr($this->_currentContent, 0, -1);
+			$currentContent = substr($currentContent, 0, -1);
 		// if no programming language was defined, it's a verbatim block
 		if (empty($this->_programmingLanguage))
-			return ('<pre>' . htmlspecialchars($this->_currentContent) . '</pre>');
+			return ('<pre>' . htmlspecialchars($currentContent) . '</pre>');
 		// is syntax highlighting disabled?
 		if (!$this->engine->getConfig()->getParam('codeSyntaxHighlight') || !class_exists('\GeSHi'))
-			return ('<pre><code class="language-' . $this->_programmingLanguage . '">' . htmlspecialchars($this->_currentContent) . '</code></pre>');
+			return ('<pre><code class="language-' . $this->_programmingLanguage . '">' . htmlspecialchars($currentContent) . '</code></pre>');
 		// syntax highlighting
 		if (!isset($this->_geshi))
 			$this->_geshi = new \GeSHi('', '');
-		$this->_geshi->set_source($this->_currentContent);
+		$this->_geshi->set_source($currentContent);
 		$this->_geshi->set_language($this->_programmingLanguage);
 		$this->_geshi->enable_classes($this->engine->getConfig()->getParam('codeInlineStyles') ? false : true);
 		$this->_geshi->enable_line_numbers($this->engine->getConfig()->getParam('codeLineNumbers') ? GESHI_NORMAL_LINE_NUMBERS : GESHI_NO_LINE_NUMBERS);
