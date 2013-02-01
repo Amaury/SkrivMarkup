@@ -49,7 +49,7 @@ class Code extends \WikiRenderer\Block {
 		if (!isset(self::$_geshi))
 			self::$_geshi = new \GeSHi('', '');
 		self::$_geshi->set_source($currentContent);
-		self::$_geshi->set_language($this->_programmingLanguage);
+		self::$_geshi->set_language($this->_programmingLanguage, true);
 		self::$_geshi->enable_classes($this->engine->getConfig()->getParam('codeInlineStyles') ? false : true);
 		self::$_geshi->enable_line_numbers($this->engine->getConfig()->getParam('codeLineNumbers') ? GESHI_NORMAL_LINE_NUMBERS : GESHI_NO_LINE_NUMBERS);
 		$result = self::$_geshi->parse_code();
