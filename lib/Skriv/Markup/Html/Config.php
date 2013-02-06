@@ -174,7 +174,7 @@ class Config extends \WikiRenderer\Config  {
 		$text = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $text);	// for ligatures e.g. '&oelig;'
 		$text = preg_replace('#&[^;]+;#', '', $text);			// strips other characters
 
-		$text = preg_replace("/[^a-zA-Z0-9_\.-]/", ' ', $text);		// remove any other characters
+		$text = preg_replace("/[^a-zA-Z0-9_-]/", ' ', $text);		// remove any other characters
 		$text = str_replace(' ', '-', $text);
 		$text = preg_replace('/\s+/', " ", $text);
 		$text = preg_replace('/-+/', "-", $text);
@@ -254,7 +254,7 @@ class Config extends \WikiRenderer\Config  {
 			if (isset($func))
 				list($url, $label, $targetBlank, $nofollow) = $func($url, $label, $targetBlank, $nofollow);
 		}
-		
+
 		return (array($url, $label, $targetBlank, $nofollow));
 	}
 
