@@ -173,9 +173,10 @@ class Config extends \WikiRenderer\Config  {
 		$text = preg_replace('#&([A-za-z])(?:acute|cedil|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $text);
 		$text = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $text);	// for ligatures e.g. '&oelig;'
 		$text = preg_replace('#&([lr]s|sb|[lrb]d)(quo);#', ' ', $text);	// for *quote (http://www.degraeve.com/reference/specialcharacters.php)
-		$text = preg_replace('#&[^;]+;#', '', $text);			// strips other characters
+		$text = str_replace('&nbsp;', ' ', $text);                      // for non breaking space
+		$text = preg_replace('#&[^;]+;#', '', $text);                   // strips other characters
 
-		$text = preg_replace("/[^a-zA-Z0-9_-]/", ' ', $text);		// remove any other characters
+		$text = preg_replace("/[^a-zA-Z0-9_-]/", ' ', $text);           // remove any other characters
 		$text = str_replace(' ', '-', $text);
 		$text = preg_replace('/\s+/', " ", $text);
 		$text = preg_replace('/-+/', "-", $text);
