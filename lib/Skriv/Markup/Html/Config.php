@@ -31,7 +31,7 @@ class Config extends \WikiRenderer\Config  {
 			'\Skriv\Markup\Html\Anchor',		// ~~anchor~~
 		)
 	);
-	/** List of bloc markups. */
+	/** List of block markups. */
 	public $blocktags = array(
 		'\Skriv\Markup\Html\Title',
 		'\Skriv\Markup\Html\WikiList',
@@ -42,6 +42,19 @@ class Config extends \WikiRenderer\Config  {
 		'\Skriv\Markup\Html\Table',
 		'\Skriv\Markup\Html\StyledBlock',
 		'\Skriv\Markup\Html\Paragraph',
+	);
+	// list of extensions and their default configuration
+	private $_extensions = array(
+		'ext-lipsum'	=> true,
+		'ext-date'	=> true,
+	);
+	// list of inline extensions
+	private $_inlineExtensions = array(
+		'ext-date'	=> '\Skriv\Markup\Html\ExtDate',
+	);
+	// list of block extensions
+	private $_blockExtensions = array(
+		'ext-lipsum'	=> '\Skriv\Markup\Html\ExtLipsum',
 	);
 
 	/* ************ SKRIV MARKUP SPECIFIC ATTRIBUTES ************* */
@@ -74,6 +87,9 @@ class Config extends \WikiRenderer\Config  {
 	 *		- bool		nofollow		Add "rel='nofollow'" to every links.
 	 *		- bool		addFootnotes		Add footnotes' content at the end of the page.
 	 *		- bool		codeInlineStyles	Activate inline styles in code blocks. (default: false)
+	 *		- bool		debugMode		Activate the debug mode, for development purposes. (default: false)
+	 *		- bool		ext-lipsum		Activate the <<<lipsum>>> extension. (default: true)
+	 *		- bool		ext-date		Activate the <<date>> extension. (default: true)
 	 * @param	\Skriv\Markup\Html\Config	parentConfig	Parent configuration object, for recursive calls.
 	 */
 	public function __construct(array $param=null, \Skriv\Markup\Html\Config $parentConfig=null) {
@@ -95,7 +111,8 @@ class Config extends \WikiRenderer\Config  {
 			'targetBlank'		=> null,
 			'nofollow'		=> null,
 			'addFootnotes'		=> false,
-			'codeInlineStyles'	=> false
+			'codeInlineStyles'	=> false,
+			'debugMode'		=> false,
 		);
 		// processing of specified parameters
 		if (isset($param['shortenLongUrl']) && $param['shortenLongUrl'] === false)
@@ -117,7 +134,7 @@ class Config extends \WikiRenderer\Config  {
 		if (isset($param['titleToIdFunction']) && is_a($param['titleToIdFunction'], 'Closure'))
 			$this->_params['titleToIdFunction'] = $param['titleToIdFunction'];
 		if (isset($param['codeSyntaxHighlight']) && $param['codeSyntaxHighlight'] === false)
-			$this->_params['codeSyntaxHighlight'] = $param['codeSyntaxHighlight'];
+			$this->_params['codeSyntaxHighlight'] = false;
 		if (isset($param['codeLineNumbers']) && $param['codeLineNumbers'] === false)
 			$this->_params['codeLineNumbers'] = false;
 		if (isset($param['firstTitleLevel']) && is_numeric($param['firstTitleLevel']) &&
@@ -128,13 +145,38 @@ class Config extends \WikiRenderer\Config  {
 		if (isset($param['nofollow']) && is_bool($param['nofollow']))
 			$this->_params['nofollow'] = $param['nofollow'];
 		if (isset($param['addFootnotes']) && $param['addFootnotes'] === true)
-			$this->_params['addFootnotes'] = $param['addFootnotes'];
+			$this->_params['addFootnotes'] = true;
 		if (isset($param['codeInlineStyles']) && $param['codeInlineStyles'] === true)
-			$this->_params['codeInlineStyles'] = $param['codeInlineStyles'];
+			$this->_params['codeInlineStyles'] = true;
+		if (isset($param['debugMode']) && $param['debugMode'] === true)
+			$this->_params['debugMode'] = true;
+		// configuration of extensions
+		foreach ($this->_extensions as $extensionName => $defaultConf) {
+			if (isset($param[$extensionName]) && is_bool($param[$extensionName]))
+				$this->_params[$extensionName] = $param[$extensionName];
+			else
+				$this->_params[$extensionName] = $defaultConf;
+		}
 		// storing the parent configuration object
 		$this->_parentConfig = $parentConfig;
 		// footnotes liste init
 		$this->_footnotes = array();
+
+		// add extensions to the lists of supported markups
+		$inlineExt = array();
+		$blockExt = array();
+		foreach ($this->_inlineExtensions as $extName => $obj) {
+			if ($this->_params[$extName])
+				$inlineExt[] = $obj;
+		}
+		foreach ($this->_blockExtensions as $extName => $obj) {
+			if ($this->_params[$extName])
+				$blockExt[] = $obj;
+		}
+		if (!empty($inlineExt))
+			$this->textLineContainers['\WikiRenderer\HtmlTextLine'] = array_merge($this->textLineContainers['\WikiRenderer\HtmlTextLine'], $inlineExt);
+		if (!empty($blockExt))
+			$this->blocktags = array_merge($blockExt, $this->blocktags);
 	}
 	/**
 	 * Build an object of the same type, "child" of the current object.
