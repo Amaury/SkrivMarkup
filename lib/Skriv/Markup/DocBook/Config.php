@@ -27,7 +27,7 @@ class Config extends \WikiRenderer\Config  {
 			'\Skriv\Markup\DocBook\Abbr',		// ??abbr|text??
 			'\Skriv\Markup\DocBook\Link',		// [[link|url]]		[[url]]
 			'\Skriv\Markup\DocBook\Image',		// {{image|url}}	{{url}}
-			'\Skriv\Markup\DcoBook\Footnote',	// ((footnote))		((label|footnote))
+			'\Skriv\Markup\DocBook\Footnote',	// ((footnote))		((label|footnote))
 			'\Skriv\Markup\DocBook\Anchor',		// ~~anchor~~
 		)
 	);
