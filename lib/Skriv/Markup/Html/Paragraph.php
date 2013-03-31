@@ -19,9 +19,15 @@ class Paragraph extends \WikiRenderer\Block {
 	public function detect($string, $inBlock=false) {
 		if (empty($string))
 			return (false);
+		if (substr_compare($string, '{{{', 0, 3) === 0 ||
+		    substr_compare($string, '[[[', 0, 3) === 0 ||
+		    substr_compare($string, '<<<', 0, 3) === 0 ||
+		    substr_compare($string, '||', 0, 2) === 0 ||
+		    substr_compare($string, '!!', 0, 2) === 0)
+			return (false);
 		if (!preg_match("/^\s*\*{2}.*\*{2}\s*.*$/", $string) &&
 		    !preg_match("/^\s*#{2}.*#{2}\s*.*$/", $string) &&
-		    preg_match("/^\s*[\*#\-\!\| \t>;=].*/", $string))
+		    preg_match("/^\s*[\*#\- \t>;=].*/", $string))
 			return (false);
 		$this->_detectMatch = array($string, $string);
 		return (true);
