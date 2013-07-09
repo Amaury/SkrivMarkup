@@ -40,7 +40,7 @@ class Table extends \WikiRenderer\Block {
 				$cell = substr($text, $prevPos, $pos - $prevPos);
 				$str .= "<$prevType>" . $this->_renderInlineTag(trim($cell)) . "</$prevType>";
 			}
-			$prevPos = $pos + 3;
+			$prevPos = $pos + 2;
 			$prevType = $type;
 		}
 		return ("<tr>$str</tr>");
