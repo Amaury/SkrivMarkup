@@ -9,7 +9,7 @@ class Code extends \WikiRenderer\Block {
 	/** Nom du langage de programmation */
 	private $_programmingLanguage = '';
 	/** Nombre de récursions. */
-	private $_recursionDepth = 0;
+	private static $_recursionDepth = 0;
 	/** This object shouldn't be cloned. */
 	protected $_mustClone = false;
 	/** Raw content of the code block. */
@@ -75,19 +75,19 @@ class Code extends \WikiRenderer\Block {
 		$this->_detectMatch = false;
 		if ($this->isOpen) {
 			if (isset($string[2]) && $string[0] === ']' && $string[1] === ']' && $string[2] === ']') {
-				$this->_recursionDepth--;
-				if ($this->_recursionDepth === 0)
+				self::$_recursionDepth--;
+				if (self::$_recursionDepth === 0)
 					$this->isOpen = false;
 			} else if (isset($string[2]) && $string[0] === '[' && $string[1] === '[' && $string[2] === ']')
-				$this->_recursionDepth++;
+				self::$_recursionDepth++;
 			if ($this->isOpen)
 				$this->_currentContent .= $string . "\n";
 			return true;
 		}
 		if (isset($string[2]) && $string[0] === '[' && $string[1] === '[' && $string[2] === '[') {
-			if ($this->_recursionDepth === 0)
+			if (self::$_recursionDepth === 0)
 				$this->_programmingLanguage = trim(substr($string, 3));
-			$this->_recursionDepth++;
+			self::$_recursionDepth++;
 			return true;
 		}
 		return false;
